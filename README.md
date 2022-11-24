@@ -172,7 +172,7 @@ and adapt the checkpoint and config paths accordingly.
 ![upscaling-x4](assets/stable-samples/upscaling/merged-dog.png)
 After [downloading the weights](https://huggingface.co/stabilityai/stable-diffusion-x4-upscaler), run
 ```
-python scripts/gradio/inpainting.py scripts/gradio/superresolution.py configs/stable-diffusion/x4-upscaling.yaml <path-to-checkpoint>
+python scripts/gradio/superresolution.py configs/stable-diffusion/x4-upscaling.yaml <path-to-checkpoint>
 ```
 
 or
