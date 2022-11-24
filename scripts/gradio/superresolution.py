@@ -67,8 +67,8 @@ def paint(sampler, image, prompt, seed, scale, h, w, steps, num_samples=1, callb
     wm = "SDV2"
     wm_encoder = WatermarkEncoder()
     wm_encoder.set_watermark('bytes', wm.encode('utf-8'))
-    with torch.no_grad(),\
-            torch.autocast("cuda"):
+    
+    with torch.inference_mode(), torch.autocast("cuda"):
         batch = make_batch_sd(
             image, txt=prompt, device=device, num_samples=num_samples)
         c = model.cond_stage_model.encode(batch["txt"])
@@ -112,8 +112,10 @@ def paint(sampler, image, prompt, seed, scale, h, w, steps, num_samples=1, callb
             x_T=start_code,
             callback=callback
         )
-    with torch.no_grad():
+    
+    with torch.inference_mode():
         x_samples_ddim = model.decode_first_stage(samples)
+    
     result = torch.clamp((x_samples_ddim + 1.0) / 2.0, min=0.0, max=1.0)
     result = result.cpu().numpy().transpose(0, 2, 3, 1) * 255
     return [put_watermark(Image.fromarray(img.astype(np.uint8)), wm_encoder) for img in result]

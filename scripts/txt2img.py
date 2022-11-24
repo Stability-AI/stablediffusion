@@ -232,9 +232,8 @@ def main(opt):
         start_code = torch.randn([opt.n_samples, opt.C, opt.H // opt.f, opt.W // opt.f], device=device)
 
     precision_scope = autocast if opt.precision == "autocast" else nullcontext
-    with torch.no_grad(), \
-        precision_scope("cuda"), \
-        model.ema_scope():
+    
+    with torch.inference_mode(), precision_scope("cuda"), model.ema_scope():
             all_samples = list()
             for n in trange(opt.n_iter, desc="Sampling"):
                 for prompts in tqdm(data, desc="data"):

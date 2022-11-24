@@ -230,7 +230,8 @@ def main():
     print(f"target t_enc is {t_enc} steps")
 
     precision_scope = autocast if opt.precision == "autocast" else nullcontext
-    with torch.no_grad():
+    
+    with torch.inference_mode():
         with precision_scope("cuda"):
             with model.ema_scope():
                 all_samples = list()
