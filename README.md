@@ -178,7 +178,7 @@ python scripts/gradio/superresolution.py configs/stable-diffusion/x4-upscaling.y
 or
 
 ```
-streamlit run scripts/streamlit/superresolution.py -- configs/stable-diffusion/upscaling_x4.yaml <path-to-checkpoint>
+streamlit run scripts/streamlit/superresolution.py -- configs/stable-diffusion/x4-upscaling.yaml <path-to-checkpoint>
 ```
 
 for a Gradio or Streamlit demo of the text-guided x4 superresolution model.  
