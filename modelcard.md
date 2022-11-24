@@ -1,5 +1,5 @@
 # Stable Diffusion v2 Model Card
-This model card focuses on the model associated with the Stable Diffusion model, available [here](https://github.com/CompVis/stable-diffusion).
+This model card focuses on the models associated with the Stable Diffusion v2, available [here](https://github.com/Stability-AI/stablediffusion/).
 
 ## Model Details
 - **Developed by:** Robin Rombach, Patrick Esser
