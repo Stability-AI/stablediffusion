@@ -3,6 +3,7 @@ opencv-python
 pudb==2019.2
 imageio==2.9.0
 imageio-ffmpeg==0.4.2
+invisible-watermark==0.1.5
 pytorch-lightning==1.4.2
 torchmetrics==0.6
 omegaconf==2.1.1
