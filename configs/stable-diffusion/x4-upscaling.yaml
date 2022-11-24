@@ -1,0 +1,76 @@
+model:
+  base_learning_rate: 1.0e-04
+  target: ldm.models.diffusion.ddpm.LatentUpscaleDiffusion
+  params:
+    parameterization: "v"
+    low_scale_key: "lr"
+    linear_start: 0.0001
+    linear_end: 0.02
+    num_timesteps_cond: 1
+    log_every_t: 200
+    timesteps: 1000
+    first_stage_key: "jpg"
+    cond_stage_key: "txt"
+    image_size: 128
+    channels: 4
+    cond_stage_trainable: false
+    conditioning_key: "hybrid-adm"
+    monitor: val/loss_simple_ema
+    scale_factor: 0.08333
+    use_ema: False
+
+    low_scale_config:
+      target: ldm.modules.diffusionmodules.upscaling.ImageConcatWithNoiseAugmentation
+      params:
+        noise_schedule_config: # image space
+          linear_start: 0.0001
+          linear_end: 0.02
+        max_noise_level: 350
+
+    unet_config:
+      target: ldm.modules.diffusionmodules.openaimodel.UNetModel
+      params:
+        use_checkpoint: True
+        num_classes: 1000  # timesteps for noise conditioning (here constant, just need one)
+        image_size: 128
+        in_channels: 7
+        out_channels: 4
+        model_channels: 256
+        attention_resolutions: [ 2,4,8]
+        num_res_blocks: 2
+        channel_mult: [ 1, 2, 2, 4]
+        disable_self_attentions: [True, True, True, False]
+        disable_middle_self_attn: False
+        num_heads: 8
+        use_spatial_transformer: True
+        transformer_depth: 1
+        context_dim: 1024
+        legacy: False
+        use_linear_in_transformer: True
+
+    first_stage_config:
+      target: ldm.models.autoencoder.AutoencoderKL
+      params:
+        embed_dim: 4
+        ddconfig:
+          # attn_type: "vanilla-xformers" this model needs efficient attention to be feasible on HR data, also the decoder seems to break in half precision (UNet is fine though)
+          double_z: True
+          z_channels: 4
+          resolution: 256
+          in_channels: 3
+          out_ch: 3
+          ch: 128
+          ch_mult: [ 1,2,4 ]  # num_down = len(ch_mult)-1
+          num_res_blocks: 2
+          attn_resolutions: [ ]
+          dropout: 0.0
+
+        lossconfig:
+          target: torch.nn.Identity
+
+    cond_stage_config:
+      target: ldm.modules.encoders.modules.FrozenOpenCLIPEmbedder
+      params:
+        freeze: True
+        layer: "penultimate"
+
