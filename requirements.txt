@@ -14,3 +14,7 @@ webdataset==0.2.5
 open-clip-torch==2.7.0
 gradio==3.11
 -e .
+
+# dev requirements
+black==22.10.0
+isort

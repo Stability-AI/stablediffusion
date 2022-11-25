@@ -1,0 +1,22 @@
+name: Python Checks
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+  workflow_dispatch:
+jobs:
+  autoformat:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v3
+    - uses: actions/setup-python@v4
+      with:
+        python-version: 3.9
+    - name: Install dependencies
+      run: |
+        python -m pip install --disable-pip-version-check black isort
+    - name: Autoformatter
+      run: |
+        black --diff .
+        isort --atomic --profile black --check-only .
