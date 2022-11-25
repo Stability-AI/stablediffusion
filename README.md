@@ -66,7 +66,7 @@ cd xformers
 git submodule update --init --recursive
 pip install -r requirements.txt
 pip install -e .
-cd ../stable-diffusion
+cd ../stablediffusion
 ```
 Upon successful installation, the code will automatically default to [memory efficient attention](https://github.com/facebookresearch/xformers)
 for the self- and cross-attention layers in the U-Net and autoencoder.
