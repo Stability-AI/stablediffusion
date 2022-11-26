@@ -26,4 +26,5 @@ dependencies:
     - invisible-watermark>=0.1.5
     - streamlit-drawable-canvas==0.8.0
     - torchmetrics==0.6.0
+    - invisible-watermark==0.1.5
     - -e .
