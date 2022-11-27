@@ -165,12 +165,6 @@ def parse_args():
         choices=["full", "autocast"],
         default="autocast"
     )
-    parser.add_argument(
-        "--repeat",
-        type=int,
-        default=1,
-        help="repeat each prompt in file this often",
-    )
     opt = parser.parse_args()
     return opt
 
@@ -218,7 +212,7 @@ def main(opt):
         print(f"reading prompts from {opt.from_file}")
         with open(opt.from_file, "r") as f:
             data = f.read().splitlines()
-            data = [p for p in data for i in range(opt.repeat)]
+            data = [p for p in data for i in range(batch_size)]
             data = list(chunk(data, batch_size))
 
     sample_path = os.path.join(outpath, "samples")
