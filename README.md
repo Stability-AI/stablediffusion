@@ -1,4 +1,31 @@
 # Stable Diffusion 2.0
+
+## Download weights
+
+```
+cd weights
+wget https://huggingface.co/stabilityai/stable-diffusion-2-inpainting/resolve/main/512-inpainting-ema.ckpt
+
+```
+
+## Build and run Container
+
+```
+docker build -t $(whoami)/stablediffusion2 --build-arg key=<you_github_key> .
+
+docker run \
+--rm -it \
+--gpus all \
+--shm-size 8G \
+--hostname $(hostname) \
+--mount type=bind,source="$PWD",target=/app \
+--mount type=bind,source="/home",target=/home \
+--mount type=bind,source="/media",target=/media \
+--privileged \
+$(whoami)/stablediffusion2
+```
+
+
 ![t2i](assets/stable-samples/txt2img/768/merged-0006.png)
 ![t2i](assets/stable-samples/txt2img/768/merged-0002.png)
 ![t2i](assets/stable-samples/txt2img/768/merged-0005.png)
