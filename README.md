@@ -71,6 +71,22 @@ cd ../stablediffusion
 Upon successful installation, the code will automatically default to [memory efficient attention](https://github.com/facebookresearch/xformers)
 for the self- and cross-attention layers in the U-Net and autoencoder.
 
+## macOS installation
+
+Instead of PyTorch 1.12.1, use the latest version of Pytorch (>=1.13) - which supports [Metal Performance Shaders](https://developer.apple.com/metal/pytorch/).
+
+```commandline
+pip install torch torchvision
+pip install transformers==4.19.2 diffusers invisible-watermark
+pip install -e .
+```
+
+Most likely `xformers` will not work, as it only supports CUDA.
+
+When running `txt2img.py` or `img2img.py`, add `--precision=full --n_samples=1 --n_iter=1` commandline arguments.
+
+Tested on a M1 Max Macbook pro with 32GB RAM. 32 GB RAM is probably the minimum for 768x768 images.
+
 ## General Disclaimer
 Stable Diffusion models are general text-to-image diffusion models and therefore mirror biases and (mis-)conceptions that are present
 in their training data. Although efforts were made to reduce the inclusion of explicit pornographic material, **we do not recommend using the provided weights for services or products without additional safety mechanisms and considerations.
