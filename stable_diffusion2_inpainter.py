@@ -20,21 +20,6 @@ def pad_image(input_image):
     return im_padded
 
 
-def create_mask(img: Image):
-    img_width, img_height  = img.size
-    empty_mask = np.zeros((img_height, img_width, 1), dtype=np.uint8)
-    
-    start_x = 150
-    end_x = img_width - 150
-    start_y = 150
-    end_y = img_height - 150
-    
-    mask = cv2.rectangle(empty_mask, (start_x, start_y), (end_x, end_y), (1), -1)
-    mask = Image.fromarray(np.uint8(mask[:, :, 0] * 255) , 'L')
-    
-    return mask
-
-
 class StableDiffusion2Inpainter:
     def __init__(
         self, 
