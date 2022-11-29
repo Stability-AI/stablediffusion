@@ -22,7 +22,7 @@ model:
       target: ldm.modules.diffusionmodules.openaimodel.UNetModel
       params:
         use_checkpoint: True
-        use_fp16: True
+        use_fp16: False
         image_size: 32 # unused
         in_channels: 4
         out_channels: 4
