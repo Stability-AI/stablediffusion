@@ -20,6 +20,8 @@ from scripts.txt2img import put_watermark
 from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 
+import deepspeed
+
 
 def chunk(it, size):
     it = iter(it)
@@ -43,6 +45,16 @@ def load_model_from_config(config, ckpt, verbose=False):
 
     model.cuda()
     model.eval()
+
+    ds_engine = deepspeed.init_inference(model,
+                                 mp_size=2,
+                                 dtype=torch.half,
+                                 checkpoint=None,
+                                 replace_method='auto',
+                                 replace_with_kernel_inject=True)
+    
+    model = ds_engine.module
+
     return model
 
 

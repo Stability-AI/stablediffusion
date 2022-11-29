@@ -17,6 +17,7 @@ from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 from ldm.models.diffusion.plms import PLMSSampler
 from ldm.models.diffusion.dpm_solver import DPMSolverSampler
+import deepspeed
 
 torch.set_grad_enabled(False)
 
@@ -39,9 +40,21 @@ def load_model_from_config(config, ckpt, verbose=False):
     if len(u) > 0 and verbose:
         print("unexpected keys:")
         print(u)
+    
 
     model.cuda()
     model.eval()
+
+    # Initialize the DeepSpeed-Inference engine
+    ds_engine = deepspeed.init_inference(model,
+                                 mp_size=2,
+                                 dtype=torch.half,
+                                 checkpoint=None,
+                                 replace_method='auto',
+                                 replace_with_kernel_inject=True)
+
+    model = ds_engine.module
+    
     return model
 
 
