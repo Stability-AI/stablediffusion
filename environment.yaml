@@ -3,7 +3,7 @@ channels:
   - pytorch
   - defaults
 dependencies:
-  - python=3.8.5
+  - python=3.9.12
   - pip=20.3
   - cudatoolkit=11.3
   - pytorch=1.12.1
@@ -14,7 +14,7 @@ dependencies:
     - opencv-python==4.6.0.66
     - imageio==2.9.0
     - imageio-ffmpeg==0.4.2
-    - pytorch-lightning==1.4.2
+    - lightning==1.8.1
     - omegaconf==2.1.1
     - test-tube>=0.7.5
     - streamlit==1.12.1
@@ -25,5 +25,7 @@ dependencies:
     - open_clip_torch==2.0.2
     - invisible-watermark>=0.1.5
     - streamlit-drawable-canvas==0.8.0
-    - torchmetrics==0.6.0
+    - torchmetrics==0.7.0
+    - prefetch_generator
+    - datasets
     - -e .
