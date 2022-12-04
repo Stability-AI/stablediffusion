@@ -1,0 +1,3 @@
+[submodule "eg_data_tools"]
+	path = eg_data_tools
+	url = https://github.com/everguard-inc/eg_data_tools.git
