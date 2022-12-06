@@ -51,7 +51,7 @@ Dependencies for the runtime apps are kept in a separate `requirements-app.txt` 
 # Pip
 pip install -r requirements-app.txt
 # or Conda
-conda install --file requirements.txt
+conda install --file requirements-app.txt
 ```
 
 #### xformers efficient attention
