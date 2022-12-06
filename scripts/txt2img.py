@@ -1,24 +1,27 @@
-import argparse, os
+import argparse
+import os
+from contextlib import nullcontext
+from itertools import islice
+
 import cv2
-import torch
 import numpy as np
+import torch
+from einops import rearrange
+from imwatermark import WatermarkEncoder
 from omegaconf import OmegaConf
 from PIL import Image
-from tqdm import tqdm, trange
-from itertools import islice
-from einops import rearrange
-from torchvision.utils import make_grid
 from pytorch_lightning import seed_everything
 from torch import autocast
-from contextlib import nullcontext
-from imwatermark import WatermarkEncoder
+from torchvision.utils import make_grid
+from tqdm import tqdm, trange
 
-from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
-from ldm.models.diffusion.plms import PLMSSampler
 from ldm.models.diffusion.dpm_solver import DPMSolverSampler
+from ldm.models.diffusion.plms import PLMSSampler
+from ldm.util import instantiate_from_config
 
 torch.set_grad_enabled(False)
+
 
 def chunk(it, size):
     it = iter(it)
@@ -52,14 +55,14 @@ def parse_args():
         type=str,
         nargs="?",
         default="a professional photograph of an astronaut riding a triceratops",
-        help="the prompt to render"
+        help="the prompt to render",
     )
     parser.add_argument(
         "--outdir",
         type=str,
         nargs="?",
         help="dir to write results to",
-        default="outputs/txt2img-samples"
+        default="outputs/txt2img-samples",
     )
     parser.add_argument(
         "--steps",
@@ -69,17 +72,17 @@ def parse_args():
     )
     parser.add_argument(
         "--plms",
-        action='store_true',
+        action="store_true",
         help="use plms sampling",
     )
     parser.add_argument(
         "--dpm",
-        action='store_true',
+        action="store_true",
         help="use DPM (2) sampler",
     )
     parser.add_argument(
         "--fixed_code",
-        action='store_true',
+        action="store_true",
         help="if enabled, uses the same starting code across all samples ",
     )
     parser.add_argument(
@@ -163,7 +166,7 @@ def parse_args():
         type=str,
         help="evaluate at this precision",
         choices=["full", "autocast"],
-        default="autocast"
+        default="autocast",
     )
     parser.add_argument(
         "--repeat",
@@ -178,7 +181,7 @@ def parse_args():
 def put_watermark(img, wm_encoder=None):
     if wm_encoder is not None:
         img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
-        img = wm_encoder.encode(img, 'dwtDct')
+        img = wm_encoder.encode(img, "dwtDct")
         img = Image.fromarray(img[:, :, ::-1])
     return img
 
@@ -202,10 +205,12 @@ def main(opt):
     os.makedirs(opt.outdir, exist_ok=True)
     outpath = opt.outdir
 
-    print("Creating invisible watermark encoder (see https://github.com/ShieldMnt/invisible-watermark)...")
+    print(
+        "Creating invisible watermark encoder (see https://github.com/ShieldMnt/invisible-watermark)..."
+    )
     wm = "SDV2"
     wm_encoder = WatermarkEncoder()
-    wm_encoder.set_watermark('bytes', wm.encode('utf-8'))
+    wm_encoder.set_watermark("bytes", wm.encode("utf-8"))
 
     batch_size = opt.n_samples
     n_rows = opt.n_rows if opt.n_rows > 0 else batch_size
@@ -229,59 +234,64 @@ def main(opt):
 
     start_code = None
     if opt.fixed_code:
-        start_code = torch.randn([opt.n_samples, opt.C, opt.H // opt.f, opt.W // opt.f], device=device)
+        start_code = torch.randn(
+            [opt.n_samples, opt.C, opt.H // opt.f, opt.W // opt.f], device=device
+        )
 
     precision_scope = autocast if opt.precision == "autocast" else nullcontext
-    with torch.no_grad(), \
-        precision_scope("cuda"), \
-        model.ema_scope():
-            all_samples = list()
-            for n in trange(opt.n_iter, desc="Sampling"):
-                for prompts in tqdm(data, desc="data"):
-                    uc = None
-                    if opt.scale != 1.0:
-                        uc = model.get_learned_conditioning(batch_size * [""])
-                    if isinstance(prompts, tuple):
-                        prompts = list(prompts)
-                    c = model.get_learned_conditioning(prompts)
-                    shape = [opt.C, opt.H // opt.f, opt.W // opt.f]
-                    samples, _ = sampler.sample(S=opt.steps,
-                                                     conditioning=c,
-                                                     batch_size=opt.n_samples,
-                                                     shape=shape,
-                                                     verbose=False,
-                                                     unconditional_guidance_scale=opt.scale,
-                                                     unconditional_conditioning=uc,
-                                                     eta=opt.ddim_eta,
-                                                     x_T=start_code)
+    with torch.no_grad(), precision_scope("cuda"), model.ema_scope():
+        all_samples = list()
+        for n in trange(opt.n_iter, desc="Sampling"):
+            for prompts in tqdm(data, desc="data"):
+                uc = None
+                if opt.scale != 1.0:
+                    uc = model.get_learned_conditioning(batch_size * [""])
+                if isinstance(prompts, tuple):
+                    prompts = list(prompts)
+                c = model.get_learned_conditioning(prompts)
+                shape = [opt.C, opt.H // opt.f, opt.W // opt.f]
+                samples, _ = sampler.sample(
+                    S=opt.steps,
+                    conditioning=c,
+                    batch_size=opt.n_samples,
+                    shape=shape,
+                    verbose=False,
+                    unconditional_guidance_scale=opt.scale,
+                    unconditional_conditioning=uc,
+                    eta=opt.ddim_eta,
+                    x_T=start_code,
+                )
 
-                    x_samples = model.decode_first_stage(samples)
-                    x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
+                x_samples = model.decode_first_stage(samples)
+                x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
 
-                    for x_sample in x_samples:
-                        x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
-                        img = Image.fromarray(x_sample.astype(np.uint8))
-                        img = put_watermark(img, wm_encoder)
-                        img.save(os.path.join(sample_path, f"{base_count:05}.png"))
-                        base_count += 1
-                        sample_count += 1
+                for x_sample in x_samples:
+                    x_sample = 255.0 * rearrange(
+                        x_sample.cpu().numpy(), "c h w -> h w c"
+                    )
+                    img = Image.fromarray(x_sample.astype(np.uint8))
+                    img = put_watermark(img, wm_encoder)
+                    img.save(os.path.join(sample_path, f"{base_count:05}.png"))
+                    base_count += 1
+                    sample_count += 1
 
-                    all_samples.append(x_samples)
+                all_samples.append(x_samples)
 
-            # additionally, save as grid
-            grid = torch.stack(all_samples, 0)
-            grid = rearrange(grid, 'n b c h w -> (n b) c h w')
-            grid = make_grid(grid, nrow=n_rows)
+        # additionally, save as grid
+        grid = torch.stack(all_samples, 0)
+        grid = rearrange(grid, "n b c h w -> (n b) c h w")
+        grid = make_grid(grid, nrow=n_rows)
 
-            # to image
-            grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
-            grid = Image.fromarray(grid.astype(np.uint8))
-            grid = put_watermark(grid, wm_encoder)
-            grid.save(os.path.join(outpath, f'grid-{grid_count:04}.png'))
-            grid_count += 1
+        # to image
+        grid = 255.0 * rearrange(grid, "c h w -> h w c").cpu().numpy()
+        grid = Image.fromarray(grid.astype(np.uint8))
+        grid = put_watermark(grid, wm_encoder)
+        grid.save(os.path.join(outpath, f"grid-{grid_count:04}.png"))
+        grid_count += 1
 
-    print(f"Your samples are ready and waiting for you here: \n{outpath} \n"
-          f" \nEnjoy.")
+    print(
+        f"Your samples are ready and waiting for you here: \n{outpath} \n" f" \nEnjoy."
+    )
 
 
 if __name__ == "__main__":

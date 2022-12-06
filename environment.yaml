@@ -27,3 +27,5 @@ dependencies:
     - streamlit-drawable-canvas==0.8.0
     - torchmetrics==0.6.0
     - -e .
+    - black==22.10.0
+    - isort

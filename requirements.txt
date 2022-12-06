@@ -17,3 +17,7 @@ kornia==0.6
 invisible-watermark>=0.1.5
 streamlit-drawable-canvas==0.8.0
 -e .
+
+# dev requirements
+black==22.10.0
+isort
