@@ -115,9 +115,9 @@ We provide a [reference script for sampling](#reference-sampling-script).
 This script incorporates an [invisible watermarking](https://github.com/ShieldMnt/invisible-watermark) of the outputs, to help viewers [identify the images as machine-generated](scripts/tests/test_watermark.py).
 We provide the configs for the _SD2-v_ (768px) and _SD2-base_ (512px) model.
 
-First, download the weights for [_SD2.0-v_](https://huggingface.co/stabilityai/stable-diffusion-2) and [_SD2.0-base_](https://huggingface.co/stabilityai/stable-diffusion-2-base). 
+First, download the weights for [_SD2.1-v_](https://huggingface.co/stabilityai/stable-diffusion-2-1) and [_SD2.1-base_](https://huggingface.co/stabilityai/stable-diffusion-2-1-base). 
 
-To sample from the _SD2-v_ model, run the following:
+To sample from the _SD2.1-v_ model, run the following:
 
 ```
 python scripts/txt2img.py --prompt "a professional photograph of an astronaut riding a horse" --ckpt <path/to/768model.ckpt/> --config configs/stable-diffusion/v2-inference-v.yaml --H 768 --W 768  
