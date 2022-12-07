@@ -80,7 +80,7 @@ Stable Diffusion v2 mirrors and exacerbates biases to such a degree that viewer 
 **Training Data**
 The model developers used the following dataset for training the model:
 
-- LAION-5B and subsets (details below). The training data is further filtered using LAION's NSFW detector, with a "p_unsafe" score of 0.1 (conservative). For more details, please refer to LAION-5B's [NeurIPS 2022](https://openreview.net/forum?id=M3Y74vmsMcY) paper and reviewer discussions on the topic.
+- LAION-5B and subsets (details below). The training data is further filtered using LAION's NSFW detector. For more details, please refer to LAION-5B's [NeurIPS 2022](https://openreview.net/forum?id=M3Y74vmsMcY) paper and reviewer discussions on the topic.
 
 **Training Procedure**
 Stable Diffusion v2 is a latent diffusion model which combines an autoencoder with a diffusion model that is trained in the latent space of the autoencoder. During training, 
@@ -90,7 +90,13 @@ Stable Diffusion v2 is a latent diffusion model which combines an autoencoder wi
 - The output of the text encoder is fed into the UNet backbone of the latent diffusion model via cross-attention.
 - The loss is a reconstruction objective between the noise that was added to the latent and the prediction made by the UNet. We also use the so-called _v-objective_, see https://arxiv.org/abs/2202.00512.
 
-We currently provide the following checkpoints:
+We currently provide the following checkpoints, for various versions:
+
+### Version 2.1
+
+- `512-base-ema.ckpt`: Fine-tuned on `512-base-ema.ckpt` 2.0 with 220k extra steps taken, with `punsafe=0.98` on the same dataset.
+- `768-v-ema.ckpt`: Resumed from `768-v-ema.ckpt` 2.0 with an additional 55k steps on the same dataset (`punsafe=0.1`), and then fine-tuned for another 155k extra steps with `punsafe=0.98`.
+### Version 2.0
 
 - `512-base-ema.ckpt`: 550k steps at resolution `256x256` on a subset of [LAION-5B](https://laion.ai/blog/laion-5b/) filtered for explicit pornographic material, using the [LAION-NSFW classifier](https://github.com/LAION-AI/CLIP-based-NSFW-Detector) with `punsafe=0.1` and an [aesthetic score](https://github.com/christophschuhmann/improved-aesthetic-predictor) >= `4.5`.
   850k steps at resolution `512x512` on the same dataset with resolution `>= 512x512`.
