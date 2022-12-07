@@ -1,0 +1,11 @@
+python custom_inpainting/generate.py \
+--input_images_dir /media/data/vv/tasks/2022_12_06_test_inpainting/samples \
+--result_images_dir /media/data/vv/tasks/2022_12_05_debug_stable_diffusion2/generated/test4 \
+--config_path /app/configs/stable-diffusion/v2-inpainting-inference.yaml \
+--weights_path /app/weights/512-inpainting-ema.ckpt \
+--generation_limit 100 \
+--base_prompt head \
+--logs_file_path /media/data/vv/tasks/2022_12_05_debug_stable_diffusion2/fire.log \
+--context_bbox_size 160 \
+--coco_ann_path /media/data/vv/inference_results/Predictions_yolov5m_2022-12-06-21-38-19_dataset_heads_gunsan_yolo_3x736x736_a6fb1d1a_conf-th_0-45_2022-12-07-12-13-51/detections_coco.json \
+--coco_bbox_padding 20 

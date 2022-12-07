@@ -1,0 +1,13 @@
+python custom_inpainting/generate.py \
+--input_images_dir /media/data/vv/tasks/2022_12_06_test_inpainting/samples \
+--result_images_dir /media/data/vv/tasks/2022_12_05_debug_stable_diffusion2/generated/test7 \
+--config_path /app/configs/stable-diffusion/v2-inpainting-inference.yaml \
+--weights_path /app/weights/512-inpainting-ema.ckpt \
+--generation_limit 100 \
+--base_prompt fire \
+--logs_file_path /media/data/vv/tasks/2022_12_05_debug_stable_diffusion2/fire.log \
+--context_bbox_size 96 \
+--number_of_areas_per_image 1 \
+--inpaint_box_size 50 \
+--tags_txt_path /home/vv/stable-diffusion-2/prompts/prompts_flame_tags.txt \
+--number_of_tags_per_prompt 10

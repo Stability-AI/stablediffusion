@@ -94,15 +94,6 @@ class InpaintingPipeline:
         # Create inpainting mask
         inpainting_mask = inpainting_area.get_inpainting_mask()
 
-
-        samples_dir = "/home/vv/stable-diffusion-2/test_dir/results"
-        sample_masks_dir = "/home/vv/stable-diffusion-2/test_dir/masks"
-
-        os.makedirs(samples_dir, exist_ok=True)
-        os.makedirs(sample_masks_dir, exist_ok=True)
-
-        inpainting_mask.save(f'{sample_masks_dir}/{random.randint(1000, 9999)}.jpg')
-
         # Resize to the model input size
         inpainting_mask = inpainting_mask.resize((self.inpainter.input_width, self.inpainter.input_width), resample=Image.Resampling.NEAREST)
         context_img = context_img.resize((self.inpainter.input_width, self.inpainter.input_width), resample=Image.Resampling.BILINEAR)
@@ -116,8 +107,6 @@ class InpaintingPipeline:
 
         # Resize result to the context_bbox size
         inpainted_crop = inpainted_crop.resize((inpainting_area.context_bbox.h, inpainting_area.context_bbox.w), resample=Image.Resampling.BILINEAR)
-
-        inpainted_crop.save(f'{samples_dir}/{random.randint(1000, 9999)}.jpg')
 
         # Insert inpainted crop to the image
         return insert_image(
@@ -206,29 +195,53 @@ def main(
     )
 
 
-if __name__ == "__main__":
+def parse_args() -> argparse.Namespace:
+    args = argparse.ArgumentParser()
+    args.add_argument('--input_images_dir', type=str, required=True)
+    args.add_argument('--result_images_dir', type=str, required=True)
+    args.add_argument('--config_path', type=str, required=True)
+    args.add_argument('--weights_path', type=str, required=True)
+    args.add_argument('--generation_limit', type=int, default=100)
+    args.add_argument('--logs_file_path', type=str, required=True)
+    args.add_argument('--context_bbox_size', type=int, required=True)
     
+    args.add_argument('--base_prompt', type=str, required=True)
+    args.add_argument('--tags_txt_path', type=str)
+    args.add_argument('--number_of_tags_per_prompt', type=int, default=1)
+    
+    args.add_argument('--coco_ann_path', type=str, help="Only for generation using COCO")
+    args.add_argument('--coco_bbox_padding', type=int, default=0, help="Only for generation using COCO")
+
+    args.add_argument('--number_of_areas_per_image', type=int, default=1, help="Only for generation in random place on image")
+    args.add_argument('--inpaint_box_size', type=int, help="Only for generation in random place on image")
+
+    args.add_argument('--half_model', action='store_true')
+    args.add_argument('--num_inference_steps', type=int, default=60)
+
+    return args.parse_args()
+
+
+if __name__ == "__main__":
+    args = parse_args()
     main(
-        input_images_dir="/media/data/vv/tasks/2022_12_06_test_inpainting/samples",
-        result_images_dir="/media/data/vv/tasks/2022_12_05_debug_stable_diffusion2/generated/test3",
-        generation_limit=10,
+        input_images_dir=args.input_images_dir,
+        result_images_dir=args.result_images_dir,
+        config_path=args.config_path,
+        weights_path=args.weights_path,
+        generation_limit=args.generation_limit,
+        logs_file_path=args.logs_file_path,
+        context_bbox_size=args.context_bbox_size,
 
-        base_prompt="head", 
-        context_bbox_size=224,
-        logs_file_path="/media/data/vv/tasks/2022_12_05_debug_stable_diffusion2/log.log",
+        base_prompt=args.base_prompt,
+        tags_txt_path=args.tags_txt_path,
+        number_of_tags_per_prompt=args.number_of_tags_per_prompt,
+        
+        coco_ann_path=args.coco_ann_path,
+        coco_bbox_padding=args.coco_bbox_padding,
 
-        coco_ann_path = "/media/data/vv/inference_results/Predictions_yolov5m_2022-12-06-21-38-19_dataset_heads_gunsan_yolo_3x736x736_a6fb1d1a_conf-th_0-45_2022-12-07-12-13-51/detections_coco.json", #None,
-        coco_bbox_padding=20,
+        number_of_areas_per_image=args.number_of_areas_per_image,
+        inpaint_box_size=args.inpaint_box_size,
 
-        inpaint_box_size = 150, 
-        number_of_areas_per_image=1,
-
-
-        config_path = "/app/configs/stable-diffusion/v2-inpainting-inference.yaml",
-        weights_path = "/app/weights/512-inpainting-ema.ckpt",
-
-        half_model=False,
-        num_inference_steps=60,
-        tags_txt_path=None, 
-        number_of_tags_per_prompt=1
+        half_model=args.half_model,
+        num_inference_steps=args.num_inference_steps,
     )
