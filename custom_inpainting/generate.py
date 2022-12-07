@@ -206,65 +206,7 @@ def main(
     )
 
 
-def parce_args() -> argparse.Namespace:
-    args = argparse.ArgumentParser()
-    args.add_argument('--input_images_dir', type=str, required=True)
-    args.add_argument('--result_images_dir', type=str, required=True)
-    args.add_argument('--generation_limit', type=int, default=100)
-
-    args.add_argument('--base_prompt', type=str, required=True)
-    args.add_argument('--context_bbox_size', type=int, required=True)
-    args.add_argument('--logs_file_path', type=str, required=True)
-
-    args.add_argument('--coco_ann_path', type=str)
-    args.add_argument('--coco_bbox_padding', type=int)
-
-
-
-    args.add_argument('--coco_bbox_padding', type=int)
-    args.add_argument('--coco_bbox_padding', type=int, default=1)
-
-
-    args.add_argument('--generated_images_dir', type=str, required=True)
-    args.add_argument('--prompts_file_path', type=str, required=True)
-    args.add_argument('--config_path', type=str, default=None)
-    args.add_argument('--weights_path', type=str, default=None)
-    args.add_argument('--half_model', action='store_true')
-    args.add_argument('--crop_size', type=int, default=512)
-    args.add_argument('--inference_resize', type=int, default=None)
-    args.add_argument('--num_infer_steps', type=int, default=60)
-    args.add_argument('--generate_prompt', action='store_true')
-
-
-    input_images_dir="/media/data/vv/tasks/2022_12_06_test_inpainting/samples",
-    result_images_dir="/media/data/vv/tasks/2022_12_05_debug_stable_diffusion2/generated/test3",
-    generation_limit=10,
-
-    base_prompt="head", 
-    context_bbox_size=224,
-    logs_file_path="/media/data/vv/tasks/2022_12_05_debug_stable_diffusion2/log.log",
-
-    coco_ann_path = "/media/data/vv/inference_results/Predictions_yolov5m_2022-12-06-21-38-19_dataset_heads_gunsan_yolo_3x736x736_a6fb1d1a_conf-th_0-45_2022-12-07-12-13-51/detections_coco.json", #None,
-    coco_bbox_padding=20,
-
-    inpaint_box_size = 150, 
-    number_of_areas_per_image=1,
-
-
-    config_path = "/app/configs/stable-diffusion/v2-inpainting-inference.yaml",
-    weights_path = "/app/weights/512-inpainting-ema.ckpt",
-
-    half_model=False,
-    num_inference_steps=60,
-    tags_txt_path=None, 
-    number_of_tags_per_prompt=1
-
-
-    return args.parse_args()
-
-
 if __name__ == "__main__":
-    # args = parce_args()
     
     main(
         input_images_dir="/media/data/vv/tasks/2022_12_06_test_inpainting/samples",
