@@ -1,17 +1,17 @@
 # Stable Diffusion 2.0
 
+
 ## Download weights
 
 ```
-cd weights
+mkdir weights && cd weights
 wget https://huggingface.co/stabilityai/stable-diffusion-2-inpainting/resolve/main/512-inpainting-ema.ckpt
-
 ```
 
 ## Build and run Container
 
 ```
-docker build -t $(whoami)/stablediffusion2 --build-arg key=<you_github_key> .
+docker build -t $(whoami)/stablediffusion2 .
 
 docker run \
 --rm -it \
