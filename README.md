@@ -1,4 +1,4 @@
-# Stable Diffusion 2.0
+# Stable Diffusion Version 2
 ![t2i](assets/stable-samples/txt2img/768/merged-0006.png)
 ![t2i](assets/stable-samples/txt2img/768/merged-0002.png)
 ![t2i](assets/stable-samples/txt2img/768/merged-0005.png)
@@ -8,7 +8,12 @@ new checkpoints. The following list provides an overview of all currently availa
 
 ## News
 
-**November 2022**
+**December 7, 2022 (2.1)**
+
+- New stable diffusion model (_Stable Diffusion 2.1-v_) at 768x768 resolution and (_Stable Diffusion 2.1-base_) at 512x512 resolution, both based on the same number of parameters and architecture as 2.0.
+- New models fine-tuned on 2.0, on a less restrictive NSFW filtering of the [LAION-5B](https://laion.ai/blog/laion-5b/) dataset, after reflecting on, and examining the assumptions made in 2.0, and consulting with the author of [LAION-5B](https://openreview.net/forum?id=M3Y74vmsMcY).
+
+**November 24, 2022 (2.0)**
 - New stable diffusion model (_Stable Diffusion 2.0-v_) at 768x768 resolution. Same number of parameters in the U-Net as 1.5, but uses [OpenCLIP-ViT/H](https://github.com/mlfoundations/open_clip) as the text encoder and is trained from scratch. _SD 2.0-v_ is a so-called [v-prediction](https://arxiv.org/abs/2202.00512) model. 
 - The above model is finetuned from _SD 2.0-base_, which was trained as a standard noise-prediction model on 512x512 images and is also made available.
 - Added a [x4 upscaling latent text-guided diffusion model](#image-upscaling-with-stable-diffusion).
@@ -82,11 +87,11 @@ The weights are available via [the StabilityAI organization at Hugging Face](htt
 
 
 
-## Stable Diffusion v2.0
+## Stable Diffusion v2
 
-Stable Diffusion v2.0 refers to a specific configuration of the model
+Stable Diffusion v2 refers to a specific configuration of the model
 architecture that uses a downsampling-factor 8 autoencoder with an 865M UNet
-and OpenCLIP ViT-H/14 text encoder for the diffusion model. The _SD 2.0-v_ model produces 768x768 px outputs. 
+and OpenCLIP ViT-H/14 text encoder for the diffusion model. The _SD 2-v_ model produces 768x768 px outputs. 
 
 Evaluations with different classifier-free guidance scales (1.5, 2.0, 3.0, 4.0,
 5.0, 6.0, 7.0, 8.0) and 50 DDIM sampling steps show the relative improvements of the checkpoints:
@@ -99,16 +104,16 @@ Evaluations with different classifier-free guidance scales (1.5, 2.0, 3.0, 4.0,
 ![txt2img-stable2](assets/stable-samples/txt2img/merged-0003.png)
 ![txt2img-stable2](assets/stable-samples/txt2img/merged-0001.png)
 
-Stable Diffusion 2.0 is a latent diffusion model conditioned on the penultimate text embeddings of a CLIP ViT-H/14 text encoder.
+Stable Diffusion 2 is a latent diffusion model conditioned on the penultimate text embeddings of a CLIP ViT-H/14 text encoder.
 We provide a [reference script for sampling](#reference-sampling-script).
 #### Reference Sampling Script
 
 This script incorporates an [invisible watermarking](https://github.com/ShieldMnt/invisible-watermark) of the outputs, to help viewers [identify the images as machine-generated](scripts/tests/test_watermark.py).
-We provide the configs for the _SD2.0-v_ (768px) and _SD2.0-base_ (512px) model.
+We provide the configs for the _SD2-v_ (768px) and _SD2-base_ (512px) model.
 
-First, download the weights for [_SD2.0-v_](https://huggingface.co/stabilityai/stable-diffusion-2) and [_SD2.0-base_](https://huggingface.co/stabilityai/stable-diffusion-2-base). 
+First, download the weights for [_SD2.0-v_](https://huggingface.co/stabilityai/stable-diffusion-2) and [_SD2-base_](https://huggingface.co/stabilityai/stable-diffusion-2-base). 
 
-To sample from the _SD2.0-v_ model, run the following:
+To sample from the _SD2-v_ model, run the following:
 
 ```
 python scripts/txt2img.py --prompt "a professional photograph of an astronaut riding a horse" --ckpt <path/to/768model.ckpt/> --config configs/stable-diffusion/v2-inference-v.yaml --H 768 --W 768  
