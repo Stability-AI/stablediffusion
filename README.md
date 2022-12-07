@@ -12,7 +12,7 @@ new checkpoints. The following list provides an overview of all currently availa
 
 *Version 2.1*
 
-- New stable diffusion model (_Stable Diffusion 2.1-v_) at 768x768 resolution and (_Stable Diffusion 2.1-base_) at 512x512 resolution, both based on the same number of parameters and architecture as 2.0 and fine-tuned on 2.0, on a less restrictive NSFW filtering of the [LAION-5B](https://laion.ai/blog/laion-5b/) dataset.
+- New stable diffusion model (_Stable Diffusion 2.1-v_, HuggingFace [link](https://huggingface.co/stabilityai/stable-diffusion-2-1)) at 768x768 resolution and (_Stable Diffusion 2.1-base_, Huggingface [link](https://huggingface.co/stabilityai/stable-diffusion-2-1-base)) at 512x512 resolution, both based on the same number of parameters and architecture as 2.0 and fine-tuned on 2.0, on a less restrictive NSFW filtering of the [LAION-5B](https://laion.ai/blog/laion-5b/) dataset.
 
 **November 24, 2022**
 
@@ -115,7 +115,7 @@ We provide a [reference script for sampling](#reference-sampling-script).
 This script incorporates an [invisible watermarking](https://github.com/ShieldMnt/invisible-watermark) of the outputs, to help viewers [identify the images as machine-generated](scripts/tests/test_watermark.py).
 We provide the configs for the _SD2-v_ (768px) and _SD2-base_ (512px) model.
 
-First, download the weights for [_SD2.0-v_](https://huggingface.co/stabilityai/stable-diffusion-2) and [_SD2-base_](https://huggingface.co/stabilityai/stable-diffusion-2-base). 
+First, download the weights for [_SD2.0-v_](https://huggingface.co/stabilityai/stable-diffusion-2) and [_SD2.0-base_](https://huggingface.co/stabilityai/stable-diffusion-2-base). 
 
 To sample from the _SD2-v_ model, run the following:
 
