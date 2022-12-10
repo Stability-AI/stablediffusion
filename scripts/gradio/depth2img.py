@@ -100,7 +100,7 @@ def paint(sampler, image, prompt, t_enc, seed, scale, num_samples=1, callback=No
         if not do_full_sample:
             # encode (scaled latent)
             z_enc = sampler.stochastic_encode(
-                z, torch.tensor([t_enc] * num_samples).to(model.device))
+                z, torch.tensor([t_enc - 1] * num_samples).to(model.device))
         else:
             z_enc = torch.randn_like(z)
         # decode it
