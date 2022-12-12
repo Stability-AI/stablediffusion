@@ -59,7 +59,7 @@ def surf(Z, cmap='rainbow', figsize=None):
 
 '''
 # --------------------------------------------
-# get image pathes
+# get image paths
 # --------------------------------------------
 '''
 
@@ -122,14 +122,14 @@ def imssave(imgs, img_path):
         cv2.imwrite(new_path, img)
 
 
-def split_imageset(original_dataroot, taget_dataroot, n_channels=3, p_size=800, p_overlap=96, p_max=1000):
+def split_imageset(original_dataroot, target_dataroot, n_channels=3, p_size=800, p_overlap=96, p_max=1000):
     """
     split the large images from original_dataroot into small overlapped images with size (p_size)x(p_size),
-    and save them into taget_dataroot; only the images with larger size than (p_max)x(p_max)
-    will be splitted.
+    and save them into target_dataroot; only the images with larger size than (p_max)x(p_max)
+    will be split.
     Args:
         original_dataroot:
-        taget_dataroot:
+        target_dataroot:
         p_size: size of small images
         p_overlap: patch size in training is a good choice
         p_max: images with smaller size than (p_max)x(p_max) keep unchanged.
@@ -139,8 +139,8 @@ def split_imageset(original_dataroot, taget_dataroot, n_channels=3, p_size=800, 
         # img_name, ext = os.path.splitext(os.path.basename(img_path))
         img = imread_uint(img_path, n_channels=n_channels)
         patches = patches_from_image(img, p_size, p_overlap, p_max)
-        imssave(patches, os.path.join(taget_dataroot,os.path.basename(img_path)))
-        #if original_dataroot == taget_dataroot:
+        imssave(patches, os.path.join(target_dataroot,os.path.basename(img_path)))
+        #if original_dataroot == target_dataroot:
         #del img_path
 
 '''
@@ -180,7 +180,7 @@ def mkdir_and_rename(path):
 
 
 # --------------------------------------------
-# get uint8 image of size HxWxn_channles (RGB)
+# get uint8 image of size HxWxn_channels (RGB)
 # --------------------------------------------
 def imread_uint(path, n_channels=3):
     #  input: path
@@ -215,7 +215,7 @@ def imwrite(img, img_path):
 
 
 # --------------------------------------------
-# get single image of size HxWxn_channles (BGR)
+# get single image of size HxWxn_channels (BGR)
 # --------------------------------------------
 def read_img(path):
     # read image by cv2
