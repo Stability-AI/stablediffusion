@@ -164,7 +164,7 @@ and the diffusion model is then conditioned on the (relative) depth output.
 
 <p align="center">
 <b> depth2image </b><br/>
-<img src=assets/stable-samples/depth2img/d2i.gif/>
+<img src=assets/stable-samples/depth2img/d2i.gif>
 </p>
 
 This model is particularly useful for a photorealistic style; see the [examples](assets/stable-samples/depth2img).
