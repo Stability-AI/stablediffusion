@@ -66,7 +66,7 @@ Installation needs a somewhat recent version of nvcc and gcc/g++, obtain those, 
 export CUDA_HOME=/usr/local/cuda-11.4
 conda install -c nvidia/label/cuda-11.4.0 cuda-nvcc
 conda install -c conda-forge gcc
-conda install -c conda-forge gxx_linux-64=9.5.0
+conda install -c conda-forge gxx_linux-64==9.5.0
 ```
 
 Then, run the following (compiling takes up to 30 min).
