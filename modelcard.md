@@ -112,7 +112,7 @@ In addition to the textual input, it receives a `noise_level` as an input parame
 - **Optimizer:** AdamW
 - **Gradient Accumulations**: 1
 - **Batch:** 32 x 8 x 2 x 4 = 2048
-- **Learning rate:** warmup to 0.0001 for 10,000 steps and then kept constant
+- **Learning rate:** warm up to 0.0001 for 10,000 steps and then kept constant
 
 ## Evaluation Results 
 Evaluations with different classifier-free guidance scales (1.5, 2.0, 3.0, 4.0,
