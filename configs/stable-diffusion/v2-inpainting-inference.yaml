@@ -15,7 +15,6 @@ model:
     conditioning_key: hybrid
     scale_factor: 0.18215
     monitor: val/loss_simple_ema
-    finetune_keys: null
     use_ema: False
 
     unet_config:
