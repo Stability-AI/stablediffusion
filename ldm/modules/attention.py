@@ -315,7 +315,7 @@ class SpatialTransformer(nn.Module):
                                                   stride=1,
                                                   padding=0))
         else:
-            self.proj_out = zero_module(nn.Linear(in_channels, inner_dim))
+            self.proj_out = zero_module(nn.Linear(inner_dim, in_channels))
         self.use_linear = use_linear
 
     def forward(self, x, context=None):
