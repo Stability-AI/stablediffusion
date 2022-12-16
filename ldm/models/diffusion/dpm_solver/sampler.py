@@ -82,6 +82,6 @@ class DPMSolverSampler(object):
         )
 
         dpm_solver = DPM_Solver(model_fn, ns, predict_x0=True, thresholding=False)
-        x = dpm_solver.sample(img, steps=S, skip_type="time_uniform", method="multistep", order=2, lower_order_final=True)
+        x = dpm_solver.sample(img, steps=S, skip_type="time_uniform", method="multistep", order=2, lower_order_final=True, callback=callback, img_callback=img_callback)
 
         return x.to(device), None
