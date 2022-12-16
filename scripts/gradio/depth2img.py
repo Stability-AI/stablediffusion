@@ -64,8 +64,7 @@ def paint(sampler, image, prompt, t_enc, seed, scale, num_samples=1, callback=No
     wm_encoder = WatermarkEncoder()
     wm_encoder.set_watermark('bytes', wm.encode('utf-8'))
 
-    with torch.no_grad(),\
-            torch.autocast("cuda"):
+    with torch.inference_mode(), torch.autocast("cuda"):
         batch = make_batch_sd(
             image, txt=prompt, device=device, num_samples=num_samples)
         z = model.get_first_stage_encoding(model.encode_first_stage(
