@@ -1,0 +1,3 @@
+gradio==3.11
+streamlit==1.12.1
+streamlit-drawable-canvas==0.8.0
