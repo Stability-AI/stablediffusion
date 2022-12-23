@@ -175,6 +175,8 @@ After [downloading the weights](https://huggingface.co/stabilityai/stable-diffus
 python scripts/gradio/superresolution.py configs/stable-diffusion/x4-upscaling.yaml <path-to-checkpoint>
 ```
 
+or try it on Replicate online demo  <a href="https://replicate.com/arielreplicate/stable_diffusion2_upscaling"><img src="https://replicate.com/arielreplicate/stable_diffusion2_upscaling/badge"></a>
+
 or
 
 ```
