@@ -1,3 +1,6 @@
+# Copyright (C) 2022 Intel Corporation
+# SPDX-License-Identifier: MIT
+
 model:
   base_learning_rate: 1.0e-4
   target: ldm.models.diffusion.ddpm.LatentDiffusion
