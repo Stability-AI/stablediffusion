@@ -1,0 +1,37 @@
+model:
+  type: t2i-decoder
+  diffusion_sampler: uniform
+  hparams:
+    image_size: 64
+    num_channels: 320
+    num_res_blocks: 3
+    channel_mult: ''
+    attention_resolutions: 32,16,8
+    num_heads: -1
+    num_head_channels: 64
+    num_heads_upsample: -1
+    use_scale_shift_norm: true
+    dropout: 0.1
+    clip_dim: 768
+    clip_emb_mult: 4
+    text_ctx: 77
+    xf_width: 1536
+    xf_layers: 0
+    xf_heads: 0
+    xf_final_ln: false
+    resblock_updown: true
+    learn_sigma: true
+    text_drop: 0.3
+    clip_emb_type: image
+    clip_emb_drop: 0.1
+    use_plm: true
+
+diffusion:
+  steps: 1000
+  learn_sigma: true
+  sigma_small: false
+  noise_schedule: squaredcos_cap_v2
+  use_kl: false
+  predict_xstart: false
+  rescale_learned_sigmas: true
+  timestep_respacing: ''

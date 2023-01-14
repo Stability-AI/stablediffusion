@@ -137,6 +137,42 @@ Note: The inference config for all model versions is designed to be used with EM
 For this reason `use_ema=False` is set in the configuration, otherwise the code will try to switch from
 non-EMA to EMA weights. 
 
+### Stable Diffusion Meets Karlo
+![upscaling-x4](assets/stable-samples/stable-unclip/panda.jpg)
+_++++++ NOTE: preliminary checkpoint for internal testing ++++++_ 
+
+Recently, [KakaoBrain](https://kakaobrain.com/) openly released [Karlo](https://github.com/kakaobrain/karlo), a pretrained, large-scale replication of [unCLIP](https://arxiv.org/abs/2204.06125) (also known as DALL·E 2).
+We introduce _Stable Karlo_, a combination of the Karlo CLIP image embedding prior, and Stable Diffusion v2.1.
+More precisely, we finetuned SD 2.1 to accept a CLIP ViT-L/14 image embedding in addition to the text encodings.
+This means that the model can be used to produce image variations in the style of unCLIP, but can also be combined with the 
+embedding prior of KARLO and directly decodes to 768x768 pixel resolution.
+
+To run the model, first download the KARLO checkpoints
+```shell
+mkdir -p checkpoints/karlo_models
+cd checkpoints/karlo_models
+wget https://arena.kakaocdn.net/brainrepo/models/karlo-public/v1.0.0.alpha/096db1af569b284eb76b3881534822d9/ViT-L-14.pt
+wget https://arena.kakaocdn.net/brainrepo/models/karlo-public/v1.0.0.alpha/0b62380a75e56f073e2844ab5199153d/ViT-L-14_stats.th
+wget https://arena.kakaocdn.net/brainrepo/models/karlo-public/v1.0.0.alpha/85626483eaca9f581e2a78d31ff905ca/prior-ckpt-step%3D01000000-of-01000000.ckpt
+cd ../../
+```
+and the finetuned SD2.1 checkpoint [+++prelim private upload on HF+++] from [https://huggingface.co/stabilityai/stable-unclip-preview](https://huggingface.co/stabilityai/stable-unclip-preview), and put the ckpt into the `checkpoints folder` 
+
+The, run
+
+```
+streamlit run scripts/streamlit/stablekarlo.py
+```
+
+The script optionally supports sampling from the full Karlo model. To do so, you need to download the 64x64 decoder and 64->256 upscaler 
+via 
+```shell
+cd checkpoints/karlo_models
+wget https://arena.kakaocdn.net/brainrepo/models/karlo-public/v1.0.0.alpha/efdf6206d8ed593961593dc029a8affa/decoder-ckpt-step%3D01000000-of-01000000.ckpt
+wget https://arena.kakaocdn.net/brainrepo/models/karlo-public/v1.0.0.alpha/4226b831ae0279020d134281f3c31590/improved-sr-ckpt-step%3D1.2M.ckpt
+cd ../../
+```
+
 ### Image Modification with Stable Diffusion
 
 ![depth2img-stable2](assets/stable-samples/depth2img/merged-0000.png)
