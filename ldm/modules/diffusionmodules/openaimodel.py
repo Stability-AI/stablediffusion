@@ -469,6 +469,7 @@ class UNetModel(nn.Module):
         num_attention_blocks=None,
         disable_middle_self_attn=False,
         use_linear_in_transformer=False,
+        adm_in_channels=None,
     ):
         super().__init__()
         if use_spatial_transformer:
@@ -536,6 +537,15 @@ class UNetModel(nn.Module):
             elif self.num_classes == "continuous":
                 print("setting up linear c_adm embedding layer")
                 self.label_emb = nn.Linear(1, time_embed_dim)
+            elif self.num_classes == "sequential":
+                assert adm_in_channels is not None
+                self.label_emb = nn.Sequential(
+                    nn.Sequential(
+                        linear(adm_in_channels, time_embed_dim),
+                        nn.SiLU(),
+                        linear(time_embed_dim, time_embed_dim),
+                    )
+                )
             else:
                 raise ValueError()
 
