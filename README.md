@@ -158,7 +158,7 @@ cd ../../
 ```
 and the finetuned SD2.1 checkpoint [+++prelim private upload on HF+++] from [https://huggingface.co/stabilityai/stable-unclip-preview](https://huggingface.co/stabilityai/stable-unclip-preview), and put the ckpt into the `checkpoints folder` 
 
-The, run
+Then, run
 
 ```
 streamlit run scripts/streamlit/stablekarlo.py

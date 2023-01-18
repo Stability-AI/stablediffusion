@@ -1796,11 +1796,13 @@ class LatentUpscaleFinetuneDiffusion(LatentFinetuneDiffusion):
 
 
 class ImageEmbeddingConditionedLatentDiffusion(LatentDiffusion):
-    def __init__(self, embedder_config, embedding_key="jpg", embedding_dropout=0.5, freeze_embedder=True, *args, **kwargs):
+    def __init__(self, embedder_config, embedding_key="jpg", embedding_dropout=0.5,
+                 freeze_embedder=True, noise_aug_config=None, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.embed_key = embedding_key
         self.embedding_dropout = embedding_dropout
         self._init_embedder(embedder_config, freeze_embedder)
+        self._init_noise_aug(noise_aug_config)
 
     def _init_embedder(self, config, freeze=True):
         embedder = instantiate_from_config(config)
@@ -1810,12 +1812,27 @@ class ImageEmbeddingConditionedLatentDiffusion(LatentDiffusion):
             for param in self.embedder.parameters():
                 param.requires_grad = False
 
+    def _init_noise_aug(self, config):
+        if config is not None:
+            # use the KARLO schedule for noise augmentation on CLIP image embeddings
+            noise_augmentor = instantiate_from_config(config)
+            assert isinstance(noise_augmentor, nn.Module)
+            noise_augmentor = noise_augmentor.eval()
+            noise_augmentor.train = disabled_train
+            self.noise_augmentor = noise_augmentor
+        else:
+            self.noise_augmentor = None
+
     def get_input(self, batch, k, cond_key=None, bs=None, **kwargs):
         outputs = LatentDiffusion.get_input(self, batch, k, bs=bs, **kwargs)
         z, c = outputs[0], outputs[1]
         img = batch[self.embed_key][:bs]
         img = rearrange(img, 'b h w c -> b c h w')
         c_adm = self.embedder(img)
+        if self.noise_augmentor is not None:
+            c_adm, noise_level_emb = self.noise_augmentor(c_adm)
+            # assume this gives embeddings of noise levels
+            c_adm = torch.cat((c_adm, noise_level_emb), 1)
         if self.training:
             c_adm = torch.bernoulli((1. - self.embedding_dropout) * torch.ones(c_adm.shape[0],
                                                                                device=c_adm.device)[:, None]) * c_adm

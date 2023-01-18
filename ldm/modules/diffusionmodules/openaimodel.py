@@ -409,6 +409,15 @@ class QKVAttention(nn.Module):
         return count_flops_attn(model, _x, y)
 
 
+class Timestep(nn.Module):
+    def __init__(self, dim):
+        super().__init__()
+        self.dim = dim
+
+    def forward(self, t):
+        return timestep_embedding(t, self.dim)
+
+
 class UNetModel(nn.Module):
     """
     The full UNet model with attention and timestep embedding.

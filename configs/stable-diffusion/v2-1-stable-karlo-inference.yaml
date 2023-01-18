@@ -23,11 +23,20 @@ model:
       params:
         model: "ViT-L/14"
 
+    noise_aug_config:
+      target: ldm.modules.encoders.modules.CLIPEmbeddingNoiseAugmentation
+      params:
+        clip_stats_path: "checkpoints/karlo_models/ViT-L-14_stats.th"
+        timestep_dim: 768
+        noise_schedule_config:
+          timesteps: 1000
+          beta_schedule: squaredcos_cap_v2
+
     unet_config:
       target: ldm.modules.diffusionmodules.openaimodel.UNetModel
       params:
         num_classes: "sequential"
-        adm_in_channels: 768
+        adm_in_channels: 1536
         use_checkpoint: True
         image_size: 32 # unused
         in_channels: 4
