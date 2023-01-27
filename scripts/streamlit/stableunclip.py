@@ -22,10 +22,11 @@ from ldm.models.diffusion.dpm_solver import DPMSolverSampler
 torch.set_grad_enabled(False)
 
 PROMPTS_ROOT = "scripts/prompts/"
-SAVE_PATH = "outputs/demo/stable-karlo/"
+SAVE_PATH = "outputs/demo/stable-unclip/"
 
 VERSION2SPECS = {
-    "Stable Karlo": {"H": 768, "W": 768, "C": 4, "f": 8},
+    "Stable unCLIP-L": {"H": 768, "W": 768, "C": 4, "f": 8},
+    "Stable unOpenCLIP-H": {"H": 768, "W": 768, "C": 4, "f": 8},
     "Full Karlo": {}
 }
 
@@ -193,12 +194,16 @@ def torch2np(x):
 
 
 @st.cache(allow_output_mutation=True, suppress_st_warning=True)
-def init(version="Stable Karlo", load_karlo_prior=False):
+def init(version="Stable unCLIP-L", load_karlo_prior=False):
     state = dict()
     if not "model" in state:
-        if version == "Stable Karlo":
-            config = "configs/stable-diffusion/v2-1-stable-karlo-inference.yaml"
-            ckpt = "checkpoints/v2-1-stable-unclip-ft.ckpt"
+        if version == "Stable unCLIP-L":
+            config = "configs/stable-diffusion/v2-1-stable-unclip-l-inference.yaml"
+            ckpt = "checkpoints/v2-1-stable-unclip-l-ft.ckpt"
+
+        elif version == "Stable unOpenCLIP-H":
+            config = "configs/stable-diffusion/v2-1-stable-unclip-h-inference.yaml"
+            ckpt = "checkpoints/v2-1-stable-unclip-h-ft.ckpt"
 
         elif version == "Full Karlo":
             from ldm.modules.karlo.kakao.sampler import T2ISampler
@@ -223,7 +228,7 @@ def init(version="Stable Karlo", load_karlo_prior=False):
             from ldm.modules.karlo.kakao.sampler import PriorSampler
             st.info("Loading KARLO CLIP prior...")
             karlo_prior = PriorSampler.from_pretrained(
-                root_dir="/fsx/robin/checkpoints/karlo_models",
+                root_dir="checkpoints/karlo_models",
                 clip_model_path="ViT-L-14.pt",
                 clip_stat_path="ViT-L-14_stats.th",
                 sampling_type="default",
@@ -266,10 +271,10 @@ def load_model_from_config(config, ckpt, verbose=False, vae_sd=None):
 
 
 if __name__ == "__main__":
-    st.title("Stable Karlo")
+    st.title("Stable unCLIP")
     mode = "txt2img"
     version = st.selectbox("Model Version", list(VERSION2SPECS.keys()), 0)
-    use_karlo = st.checkbox("Use KARLO prior", False)
+    use_karlo = st.checkbox("Use KARLO prior", False) and version in ["Stable unCLIP-L"]
     state = init(version=version, load_karlo_prior=use_karlo)
     st.info(state["msg"])
     prompt = st.text_input("Prompt", "a professional photograph of an astronaut riding a horse")

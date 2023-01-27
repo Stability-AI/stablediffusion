@@ -137,15 +137,28 @@ Note: The inference config for all model versions is designed to be used with EM
 For this reason `use_ema=False` is set in the configuration, otherwise the code will try to switch from
 non-EMA to EMA weights. 
 
-### Stable Diffusion Meets Karlo
-![upscaling-x4](assets/stable-samples/stable-unclip/panda.jpg)
-_++++++ NOTE: preliminary checkpoint for internal testing ++++++_ 
+### Stable unCLIP
+_++++++ NOTE: preliminary checkpoints for internal testing ++++++_
 
-Recently, [KakaoBrain](https://kakaobrain.com/) openly released [Karlo](https://github.com/kakaobrain/karlo), a pretrained, large-scale replication of [unCLIP](https://arxiv.org/abs/2204.06125) (also known as DALL·E 2).
-We introduce _Stable Karlo_, a combination of the Karlo CLIP image embedding prior, and Stable Diffusion v2.1.
-More precisely, we finetuned SD 2.1 to accept a CLIP ViT-L/14 image embedding in addition to the text encodings.
-This means that the model can be used to produce image variations in the style of unCLIP, but can also be combined with the 
-embedding prior of KARLO and directly decodes to 768x768 pixel resolution.
+[unCLIP](https://openai.com/dall-e-2/) is the approach behind OpenAI's [DALL·E 2](https://openai.com/dall-e-2/), 
+trained to invert CLIP image embeddings. 
+We finetuned SD 2.1 to accept a CLIP ViT-L/14 image embedding in addition to the text encodings.
+This means that the model can be used to produce image variations, but can also be combined with a text-to-image 
+embedding prior to yield a full text-to-image model at 768x768 resolution. 
+We provide two models, trained on OpenAI CLIP-L and OpenCLIP-H image embeddings, respectively, available
+_[TODO: +++prelim private upload on HF+++]_ from [https://huggingface.co/stabilityai/stable-unclip-preview](https://huggingface.co/stabilityai/stable-unclip-preview).
+To use them, download from Hugging Face, and put and the weights into the `checkpoints` folder.  
+#### Image Variations
+![image-variations-h](assets/stable-samples/stable-unclip/castle.jpg)
+![image-variations-h](assets/stable-samples/stable-unclip/cornmen.jpg)
+
+_++TODO: Input images from the DIV2K dataset. Proceed with care++_
+
+#### Stable Diffusion Meets Karlo
+![panda](assets/stable-samples/stable-unclip/panda.jpg) 
+
+Recently, [KakaoBrain](https://kakaobrain.com/) openly released [Karlo](https://github.com/kakaobrain/karlo), a pretrained, large-scale replication of [unCLIP](https://arxiv.org/abs/2204.06125).
+We introduce _Stable Karlo_, a combination of the Karlo CLIP image embedding prior, and Stable Diffusion v2.1-768.
 
 To run the model, first download the KARLO checkpoints
 ```shell
@@ -156,7 +169,7 @@ wget https://arena.kakaocdn.net/brainrepo/models/karlo-public/v1.0.0.alpha/0b623
 wget https://arena.kakaocdn.net/brainrepo/models/karlo-public/v1.0.0.alpha/85626483eaca9f581e2a78d31ff905ca/prior-ckpt-step%3D01000000-of-01000000.ckpt
 cd ../../
 ```
-and the finetuned SD2.1 checkpoint [+++prelim private upload on HF+++] from [https://huggingface.co/stabilityai/stable-unclip-preview](https://huggingface.co/stabilityai/stable-unclip-preview), and put the ckpt into the `checkpoints folder` 
+and the finetuned SD2.1 unCLIP-L checkpoint _[TODO: +++prelim private upload on HF+++]_ from [https://huggingface.co/stabilityai/stable-unclip-preview](https://huggingface.co/stabilityai/stable-unclip-preview), and put the ckpt into the `checkpoints folder` 
 
 Then, run
 
