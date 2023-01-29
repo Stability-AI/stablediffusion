@@ -46,7 +46,6 @@ model:
         use_linear_in_transformer: True
         transformer_depth: 1
         context_dim: 1024
-        spatial_transformer_attn_type: "softmax-xformers"
         legacy: False
 
     first_stage_config:

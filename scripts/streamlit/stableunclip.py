@@ -298,15 +298,11 @@ if __name__ == "__main__":
     seed_everything(seed)
 
     ucg_schedule = None
-    sampler = st.sidebar.selectbox("Sampler", ["DDIM", "PLMS", "DPM"], 0)
+    sampler = st.sidebar.selectbox("Sampler", ["DDIM", "DPM"], 0)
     if version == "Full Karlo":
         pass
     else:
-        if sampler == "PLMS":
-            st.warning("NOTE: Some models (such as v-pred) currently only support DDIM/DPM sampling here")
-            sampler = PLMSSampler(state["model"])
-        elif sampler == "DPM":
-            st.warning("NOTE: Using DPM sampler with default sampling parameters (DPM-2)")
+        if sampler == "DPM":
             sampler = DPMSolverSampler(state["model"])
         elif sampler == "DDIM":
             sampler = DDIMSampler(state["model"])
@@ -342,7 +338,6 @@ if __name__ == "__main__":
         init_img = get_init_img(batch_size=number_cols)
         with torch.no_grad():
             adm_cond = state["model"].embedder(init_img)
-            adm_uc = torch.zeros_like(adm_cond)
             if state["model"].noise_augmentor is not None:
                 noise_level = st.number_input("Noise Augmentation for CLIP embeddings", min_value=0,
                                               max_value=state["model"].noise_augmentor.max_noise_level - 1, value=0)
@@ -350,6 +345,7 @@ if __name__ == "__main__":
                     torch.tensor([noise_level]).to(state["model"].device), '1 -> b', b=number_cols))
                 # assume this gives embeddings of noise levels
                 adm_cond = torch.cat((c_adm, noise_level_emb), 1)
+            adm_uc = torch.zeros_like(adm_cond)
 
     if st.button("Sample"):
         print("running prompt:", prompt)

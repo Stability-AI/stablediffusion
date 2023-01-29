@@ -132,7 +132,6 @@ class FrozenCLIPEmbedder(AbstractEncoder):
         return self(text)
 
 
-from clip import load as load_clip
 class ClipImageEmbedder(nn.Module):
     def __init__(
             self,
@@ -143,6 +142,7 @@ class ClipImageEmbedder(nn.Module):
             ucg_rate=0.
     ):
         super().__init__()
+        from clip import load as load_clip
         self.model, _ = load_clip(name=model, device=device, jit=jit)
 
         self.antialias = antialias
