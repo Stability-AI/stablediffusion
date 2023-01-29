@@ -16,6 +16,7 @@ model:
     conditioning_key: crossattn-adm
     scale_factor: 0.18215
     monitor: val/loss_simple_ema
+    use_ema: False
 
     embedder_config:
       target: ldm.modules.encoders.modules.FrozenOpenCLIPImageEmbedder

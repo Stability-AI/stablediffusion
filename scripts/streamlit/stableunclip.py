@@ -274,7 +274,7 @@ if __name__ == "__main__":
     st.title("Stable unCLIP")
     mode = "txt2img"
     version = st.selectbox("Model Version", list(VERSION2SPECS.keys()), 0)
-    use_karlo = st.checkbox("Use KARLO prior", False) and version in ["Stable unCLIP-L"]
+    use_karlo = version in ["Stable unCLIP-L"] and st.checkbox("Use KARLO prior", False)
     state = init(version=version, load_karlo_prior=use_karlo)
     st.info(state["msg"])
     prompt = st.text_input("Prompt", "a professional photograph of an astronaut riding a horse")
@@ -306,8 +306,6 @@ if __name__ == "__main__":
             sampler = DPMSolverSampler(state["model"])
         elif sampler == "DDIM":
             sampler = DDIMSampler(state["model"])
-            if st.checkbox("Try oscillating guidance?", False):
-                ucg_schedule = make_oscillating_guidance_schedule(num_steps=steps, max_weight=scale, min_weight=1.)
         else:
             raise ValueError(f"unknown sampler {sampler}!")
 
