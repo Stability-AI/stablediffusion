@@ -99,7 +99,8 @@ def sample(
 ):
     batch_size = n_samples
     precision_scope = autocast if not use_full_precision else nullcontext
-    if use_full_precision: st.warning(f"Sampling {model.__class__.__name__} at full precision.")
+    #decoderscope = autocast if not use_full_precision else nullcontext
+    if use_full_precision: st.warning(f"Running {model.__class__.__name__} at full precision.")
     if isinstance(prompt, str):
         prompt = [prompt]
     prompts = batch_size * prompt
@@ -146,7 +147,6 @@ def sample(
                                                  callback=callback,
                                                  ucg_schedule=ucg_schedule
                                                  )
-
                 x_samples = model.decode_first_stage(samples_ddim)
                 x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
 
@@ -277,14 +277,14 @@ if __name__ == "__main__":
     use_karlo = version in ["Stable unCLIP-L"] and st.checkbox("Use KARLO prior", False)
     state = init(version=version, load_karlo_prior=use_karlo)
     st.info(state["msg"])
-    prompt = st.text_input("Prompt", "a professional photograph of an astronaut riding a horse")
+    prompt = st.text_input("Prompt", "a professional photograph")
     negative_prompt = st.text_input("Negative Prompt", "")
     scale = st.number_input("cfg-scale", value=10., min_value=-100., max_value=100.)
     number_rows = st.number_input("num rows", value=2, min_value=1, max_value=10)
     number_cols = st.number_input("num cols", value=2, min_value=1, max_value=10)
-    steps = st.sidebar.number_input("steps", value=40, min_value=1, max_value=1000)
+    steps = st.sidebar.number_input("steps", value=20, min_value=1, max_value=1000)
     eta = st.sidebar.number_input("eta (DDIM)", value=0., min_value=0., max_value=1.)
-    force_full_precision = st.sidebar.checkbox("Force FP32", False)
+    force_full_precision = st.sidebar.checkbox("Force FP32", False)  # TODO: check if/where things break.
     if version != "Full Karlo":
         H = st.sidebar.number_input("H", value=VERSION2SPECS[version]["H"], min_value=64, max_value=2048)
         W = st.sidebar.number_input("W", value=VERSION2SPECS[version]["W"], min_value=64, max_value=2048)
@@ -330,7 +330,7 @@ if __name__ == "__main__":
                 c_adm, noise_level_emb = state["model"].noise_augmentor(adm_cond, noise_level=repeat(
                     torch.tensor([noise_level]).to(state["model"].device), '1 -> b', b=number_cols))
                 adm_cond = torch.cat((c_adm, noise_level_emb), 1)
-            adm_uc = torch.zeros_like(karlo_prediction)
+            adm_uc = torch.zeros_like(adm_cond)
 
     else:
         init_img = get_init_img(batch_size=number_cols)
