@@ -1,6 +1,3 @@
-# Copyright (C) 2022 Intel Corporation
-# SPDX-License-Identifier: MIT
-
 """SAMPLING ONLY."""
 
 import torch

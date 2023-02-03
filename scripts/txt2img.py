@@ -1,6 +1,3 @@
-# Copyright (C) 2022 Intel Corporation
-# SPDX-License-Identifier: MIT
-
 import argparse, os
 import cv2
 import torch
@@ -270,10 +267,10 @@ def main(opt):
         if opt.bf16 and not opt.torchscript and not opt.ipex:
             raise ValueError('Bfloat16 is supported only for torchscript+ipex')
         if opt.bf16 and unet.dtype != torch.bfloat16:
-            raise ValueError("Use configs/stable-diffusion/ipex/ configs with bf16 enabled if " +
+            raise ValueError("Use configs/stable-diffusion/intel/ configs with bf16 enabled if " +
                              "you'd like to use bfloat16 with CPU.")
         if unet.dtype == torch.float16 and device == torch.device("cpu"):
-            raise ValueError("Use configs/stable-diffusion/ipex/ configs for your model if you'd like to run it on CPU.")
+            raise ValueError("Use configs/stable-diffusion/intel/ configs for your model if you'd like to run it on CPU.")
 
         if opt.ipex:
             import intel_extension_for_pytorch as ipex
@@ -292,7 +289,7 @@ def main(opt):
                 # get UNET scripted
                 if unet.use_checkpoint:
                     raise ValueError("Gradient checkpoint won't work with tracing. " +
-                    "Use configs/stable-diffusion/ipex/ configs for your model or disable checkpoint in your config.")
+                    "Use configs/stable-diffusion/intel/ configs for your model or disable checkpoint in your config.")
 
                 img_in = torch.ones(2, 4, 96, 96, dtype=torch.float32)
                 t_in = torch.ones(2, dtype=torch.int64)
