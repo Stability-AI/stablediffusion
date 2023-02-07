@@ -26,7 +26,7 @@ def chunk(it, size):
     return iter(lambda: tuple(islice(it, size)), ())
 
 
-def load_model_from_config(config, ckpt, device=torch.device("cuda"), verbose=False):
+def load_model_from_config(config, ckpt, device=torch.device("cpu"), verbose=False):
     print(f"Loading model from {ckpt}")
     pl_sd = torch.load(ckpt, map_location="cpu")
     if "global_step" in pl_sd:
@@ -295,7 +295,7 @@ def main(opt):
                 cache_dir = Path(Path.home(), "cache_stable_diff")
                 if not cache_dir.exists():
                     cache_dir.mkdir(exist_ok=True)
-                    
+
                 unet_path = Path(cache_dir, "unet.pt")
                 if unet_path.exists():
                     scripted_unet = torch.jit.load(unet_path)

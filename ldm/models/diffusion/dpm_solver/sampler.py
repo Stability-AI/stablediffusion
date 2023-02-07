@@ -11,7 +11,7 @@ MODEL_TYPES = {
 
 
 class DPMSolverSampler(object):
-    def __init__(self, model, device=torch.device("cuda"), **kwargs):
+    def __init__(self, model, device=torch.device("cpu"), **kwargs):
         super().__init__()
         self.model = model
         self.device = device
