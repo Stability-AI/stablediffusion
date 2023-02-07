@@ -20,6 +20,14 @@ from ldm.models.diffusion.dpm_solver import DPMSolverSampler
 
 torch.set_grad_enabled(False)
 
+def get_device():
+    if(torch.cuda.is_available()):
+        return 'cuda'
+    elif(torch.backends.mps.is_available()):
+        return 'mps'
+    else:
+        return 'cpu'
+
 def chunk(it, size):
     it = iter(it)
     return iter(lambda: tuple(islice(it, size)), ())
@@ -32,6 +40,7 @@ def load_model_from_config(config, ckpt, verbose=False):
         print(f"Global Step: {pl_sd['global_step']}")
     sd = pl_sd["state_dict"]
     model = instantiate_from_config(config.model)
+
     m, u = model.load_state_dict(sd, strict=False)
     if len(m) > 0 and verbose:
         print("missing keys:")
@@ -40,7 +49,7 @@ def load_model_from_config(config, ckpt, verbose=False):
         print("unexpected keys:")
         print(u)
 
-    model.cuda()
+    model.to(get_device())
     model.eval()
     return model
 
@@ -150,6 +159,7 @@ def parse_args():
     parser.add_argument(
         "--ckpt",
         type=str,
+        default="/Users/ftps/stablediffusion/model/768-v-ema.ckpt",
         help="path to checkpoint of model",
     )
     parser.add_argument(
@@ -189,8 +199,8 @@ def main(opt):
     config = OmegaConf.load(f"{opt.config}")
     model = load_model_from_config(config, f"{opt.ckpt}")
 
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
-    model = model.to(device)
+    device = torch.device(get_device())
+    #model = model.to(get_device())
 
     if opt.plms:
         sampler = PLMSSampler(model)
@@ -231,9 +241,10 @@ def main(opt):
     if opt.fixed_code:
         start_code = torch.randn([opt.n_samples, opt.C, opt.H // opt.f, opt.W // opt.f], device=device)
 
-    precision_scope = autocast if opt.precision == "autocast" else nullcontext
+    if device.type == 'mps':
+        precision_scope = nullcontext
     with torch.no_grad(), \
-        precision_scope("cuda"), \
+        precision_scope(device.type), \
         model.ema_scope():
             all_samples = list()
             for n in trange(opt.n_iter, desc="Sampling"):
@@ -254,7 +265,6 @@ def main(opt):
                                                      unconditional_conditioning=uc,
                                                      eta=opt.ddim_eta,
                                                      x_T=start_code)
-
                     x_samples = model.decode_first_stage(samples)
                     x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
 
