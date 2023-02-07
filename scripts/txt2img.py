@@ -144,7 +144,7 @@ def parse_args():
     parser.add_argument(
         "--config",
         type=str,
-        default="configs/stable-diffusion/v2-inference.yaml",
+        default="configs/stable-diffusion/v2-inference-v-m.yaml",
         help="path to config which constructs model",
     )
     parser.add_argument(
