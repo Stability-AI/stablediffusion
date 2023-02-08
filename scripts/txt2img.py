@@ -12,6 +12,7 @@ from pytorch_lightning import seed_everything
 from torch import autocast
 from contextlib import nullcontext
 from imwatermark import WatermarkEncoder
+from pathlib import Path
 
 from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
@@ -25,7 +26,7 @@ def chunk(it, size):
     return iter(lambda: tuple(islice(it, size)), ())
 
 
-def load_model_from_config(config, ckpt, device=torch.device("cuda"), verbose=False):
+def load_model_from_config(config, ckpt, device=torch.device("cpu"), verbose=False):
     print(f"Loading model from {ckpt}")
     pl_sd = torch.load(ckpt, map_location="cpu")
     if "global_step" in pl_sd:
@@ -291,18 +292,32 @@ def main(opt):
                     raise ValueError("Gradient checkpoint won't work with tracing. " +
                     "Use configs/stable-diffusion/intel/ configs for your model or disable checkpoint in your config.")
 
-                img_in = torch.ones(2, 4, 96, 96, dtype=torch.float32)
-                t_in = torch.ones(2, dtype=torch.int64)
-                context = torch.ones(2, 77, 1024, dtype=torch.float32)
-                scripted_unet = torch.jit.trace(unet, (img_in, t_in, context))
-                scripted_unet = torch.jit.optimize_for_inference(scripted_unet)
+                cache_dir = Path(Path.home(), "cache_stable_diff")
+                if not cache_dir.exists():
+                    cache_dir.mkdir(exist_ok=True)
+
+                unet_path = Path(cache_dir, "unet.pt")
+                if unet_path.exists():
+                    scripted_unet = torch.jit.load(unet_path)
+                else:
+                    img_in = torch.ones(2, 4, 96, 96, dtype=torch.float32)
+                    t_in = torch.ones(2, dtype=torch.int64)
+                    context = torch.ones(2, 77, 1024, dtype=torch.float32)
+                    scripted_unet = torch.jit.trace(unet, (img_in, t_in, context))
+                    scripted_unet = torch.jit.optimize_for_inference(scripted_unet)
+                    torch.jit.save(scripted_unet, unet_path)
                 print(type(scripted_unet))
                 model.model.scripted_diffusion_model = scripted_unet
 
                 # get Decoder for first stage model scripted
-                samples_ddim = torch.ones(1, 4, 96, 96, dtype=torch.float32)
-                scripted_decoder = torch.jit.trace(decoder, (samples_ddim))
-                scripted_decoder = torch.jit.optimize_for_inference(scripted_decoder)
+                decoder_path = Path(cache_dir, "decoder.pt")
+                if decoder_path.exists():
+                    scripted_decoder = torch.jit.load(decoder_path)
+                else:
+                    samples_ddim = torch.ones(1, 4, 96, 96, dtype=torch.float32)
+                    scripted_decoder = torch.jit.trace(decoder, (samples_ddim))
+                    scripted_decoder = torch.jit.optimize_for_inference(scripted_decoder)
+                    torch.jit.save(scripted_decoder, decoder_path)
                 print(type(scripted_decoder))
                 model.first_stage_model.decoder = scripted_decoder
 
