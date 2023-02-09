@@ -150,6 +150,8 @@ class CrossAttention(nn.Module):
 
         self.scale = dim_head ** -0.5
         self.heads = heads
+        self.dim_head = dim_head
+        self.inner_dim = inner_dim
 
         self.to_q = nn.Linear(query_dim, inner_dim, bias=False)
         self.to_k = nn.Linear(context_dim, inner_dim, bias=False)
@@ -162,21 +164,33 @@ class CrossAttention(nn.Module):
 
     def forward(self, x, context=None, mask=None):
         h = self.heads
+        batch = x.size(0)
 
         q = self.to_q(x)
         context = default(context, x)
         k = self.to_k(context)
         v = self.to_v(context)
 
-        q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> (b h) n d', h=h), (q, k, v))
+        v = v.view(v.size(0), v.size(1), h, self.dim_head).transpose(1, 2)
+        v = torch.flatten(v, 0, 1)
+
+        k = k.view(k.size(0), k.size(1), h, self.dim_head).transpose(1, 2)
+        k = torch.flatten(k, 0, 1)
+
+        q = q.view(q.size(0), q.size(1), h, self.dim_head).transpose(1, 2)
+        q = torch.flatten(q, 0, 1)
+
+        #q, k, v = map(lambda t: rearrange(t, 'b n (h d) -> (b h) n d', h=h), (q, k, v))
 
         # force cast to fp32 to avoid overflowing
         if _ATTN_PRECISION =="fp32":
             with torch.autocast(enabled=False, device_type = 'cuda'):
-                q, k = q.float(), k.float()
-                sim = einsum('b i d, b j d -> b i j', q, k) * self.scale
+                #q, k = q.float(), k.float()
+                sim = torch.bmm(q, k.transpose(1,2))
+                #sim = einsum('b i d, b j d -> b i j', q, k) * self.scale
         else:
-            sim = einsum('b i d, b j d -> b i j', q, k) * self.scale
+            #sim = einsum('b i d, b j d -> b i j', q, k) * self.scale
+            sin = torch.bmm(q, k.transpose(1,2))
         
         del q, k
     
@@ -189,8 +203,11 @@ class CrossAttention(nn.Module):
         # attention, what we cannot get enough of
         sim = sim.softmax(dim=-1)
 
-        out = einsum('b i j, b j d -> b i d', sim, v)
-        out = rearrange(out, '(b h) n d -> b n (h d)', h=h)
+        #out = einsum('b i j, b j d -> b i d', sim, v)
+        out = torch.bmm(sim, v)
+        #out = rearrange(out, '(b h) n d -> b n (h d)', h=h)
+        out = out.view(batch, h, out.size(1), self.dim_head).transpose(1, 2)
+        out = out.reshape(out.size(0), out.size(1), self.inner_dim)
         return self.to_out(out)
 
 
