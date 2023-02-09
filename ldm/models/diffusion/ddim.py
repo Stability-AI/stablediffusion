@@ -18,7 +18,10 @@ class DDIMSampler(object):
     def register_buffer(self, name, attr):
         if type(attr) == torch.Tensor:
             if attr.device != self.device:
-                attr = attr.to(self.device, torch.float32)
+                if str(self.device) == 'mps':
+                    attr = attr.to(self.device, torch.float32)
+                else:
+                    attr = attr.to(self.device)
         setattr(self, name, attr)
 
     def make_schedule(self, ddim_num_steps, ddim_discretize="uniform", ddim_eta=0., verbose=True):
