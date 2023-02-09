@@ -304,8 +304,9 @@ def main(opt):
                     t_in = torch.ones(2, dtype=torch.int64)
                     context = torch.ones(2, 77, 1024, dtype=torch.float32)
                     scripted_unet = torch.jit.trace(unet, (img_in, t_in, context))
-                    scripted_unet = torch.jit.optimize_for_inference(scripted_unet)
+                    scripted_unet = torch.jit.freeze(scripted_unet)
                     torch.jit.save(scripted_unet, unet_path)
+                    print(unet_path)
                 print(type(scripted_unet))
                 model.model.scripted_diffusion_model = scripted_unet
 
@@ -316,8 +317,9 @@ def main(opt):
                 else:
                     samples_ddim = torch.ones(1, 4, 96, 96, dtype=torch.float32)
                     scripted_decoder = torch.jit.trace(decoder, (samples_ddim))
-                    scripted_decoder = torch.jit.optimize_for_inference(scripted_decoder)
+                    scripted_decoder = torch.jit.freeze(scripted_decoder)
                     torch.jit.save(scripted_decoder, decoder_path)
+                    print(decoder_path)
                 print(type(scripted_decoder))
                 model.first_stage_model.decoder = scripted_decoder
 
