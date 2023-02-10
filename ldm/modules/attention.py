@@ -344,14 +344,18 @@ class SpatialTransformer(nn.Module):
         x = self.norm(x)
         if not self.use_linear:
             x = self.proj_in(x)
-        x = rearrange(x, 'b c h w -> b (h w) c').contiguous()
+        #x = rearrange(x, 'b c h w -> b (h w) c').contiguous()
+        x = torch.permute(x, (0, 2, 3, 1))
+        x = torch.flatten(x, 1, 2)
         if self.use_linear:
             x = self.proj_in(x)
         for i, block in enumerate(self.transformer_blocks):
             x = block(x, context=context[i])
         if self.use_linear:
             x = self.proj_out(x)
-        x = rearrange(x, 'b (h w) c -> b c h w', h=h, w=w).contiguous()
+        #x = rearrange(x, 'b (h w) c -> b c h w', h=h, w=w).contiguous()
+        x = x.view(x.size(0), h, w, x.size(2))
+        x = torch.permute(x, (0, 3, 1, 2))
         if not self.use_linear:
             x = self.proj_out(x)
         return x + x_in
