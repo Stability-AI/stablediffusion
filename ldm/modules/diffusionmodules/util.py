@@ -211,7 +211,7 @@ def normalization(channels):
 # PyTorch 1.7 has SiLU, but we support PyTorch 1.5.
 class SiLU(nn.Module):
     def forward(self, x):
-        return x * torch.sigmoid(x)
+        return torch.silu(x)
 
 
 class GroupNorm32(nn.GroupNorm):
