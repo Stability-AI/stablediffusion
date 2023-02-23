@@ -361,7 +361,7 @@ if __name__ == "__main__":
         if num_inputs > 1:
             if st.checkbox("Apply Noise to Embedding Mix", True):
                 noise_level = st.number_input(f"Noise Augmentation for averaged CLIP embeddings", min_value=0,
-                                              max_value=state["model"].noise_augmentor.max_noise_level - 1, value=0, )
+                                              max_value=state["model"].noise_augmentor.max_noise_level - 1, value=50, )
                 c_adm, noise_level_emb = state["model"].noise_augmentor(
                     adm_cond[:, :state["model"].noise_augmentor.time_embed.dim],
                     noise_level=repeat(
