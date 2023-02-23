@@ -276,7 +276,6 @@ if __name__ == "__main__":
     version = st.selectbox("Model Version", list(VERSION2SPECS.keys()), 0)
     use_karlo = version in ["Stable unCLIP-L"] and st.checkbox("Use KARLO prior", False)
     state = init(version=version, load_karlo_prior=use_karlo)
-    st.info(state["msg"])
     prompt = st.text_input("Prompt", "a professional photograph")
     negative_prompt = st.text_input("Negative Prompt", "")
     scale = st.number_input("cfg-scale", value=10., min_value=-100., max_value=100.)

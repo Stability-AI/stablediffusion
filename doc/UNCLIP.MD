@@ -1,19 +1,14 @@
 ### Stable unCLIP
-_++++++ NOTE: preliminary checkpoints for internal testing ++++++_
 
 [unCLIP](https://openai.com/dall-e-2/) is the approach behind OpenAI's [DALL·E 2](https://openai.com/dall-e-2/), 
 trained to invert CLIP image embeddings. 
 We finetuned SD 2.1 to accept a CLIP ViT-L/14 image embedding in addition to the text encodings.
 This means that the model can be used to produce image variations, but can also be combined with a text-to-image 
 embedding prior to yield a full text-to-image model at 768x768 resolution. 
-We provide two models, trained on OpenAI CLIP-L and OpenCLIP-H image embeddings, respectively, available
-_[TODO: +++prelim private upload on HF+++]_ from [https://huggingface.co/stabilityai/stable-unclip-preview](https://huggingface.co/stabilityai/stable-unclip-preview).
+We provide two models, trained on OpenAI CLIP-L and OpenCLIP-H image embeddings, respectively, available from [https://huggingface.co/stabilityai/](TODO).
 To use them, download from Hugging Face, and put and the weights into the `checkpoints` folder.  
 #### Image Variations
-![image-variations-l-1](../assets/stable-samples/stable-unclip/houses_out.jpeg)
-![image-variations-l-2](../assets/stable-samples/stable-unclip/plates_out.jpeg)
-
-_++TODO: Input images from the DIV2K dataset. check license++_
+![image-variations-l-1](../assets/stable-samples/stable-unclip/unclip-variations.png)
 
 Run
 
@@ -24,16 +19,7 @@ to launch a streamlit script than can be used to make image variations with both
 These models can process a `noise_level`, which specifies an amount of Gaussian noise added to the CLIP embeddings. 
 This can be used to increase output variance as in the following examples.
 
-**noise_level = 0**
-![image-variations-l-3](../assets/stable-samples/stable-unclip/oldcar000.jpeg)
-
-**noise_level = 500**
-![image-variations-l-4](../assets/stable-samples/stable-unclip/oldcar500.jpeg)
-
-**noise_level = 800**
-![image-variations-l-6](../assets/stable-samples/stable-unclip/oldcar800.jpeg)
-
-
+![image-variations-noise](../assets/stable-samples/stable-unclip/unclip-variations_noise.png)
 
 
 ### Stable Diffusion Meets Karlo
@@ -51,7 +37,7 @@ wget https://arena.kakaocdn.net/brainrepo/models/karlo-public/v1.0.0.alpha/0b623
 wget https://arena.kakaocdn.net/brainrepo/models/karlo-public/v1.0.0.alpha/85626483eaca9f581e2a78d31ff905ca/prior-ckpt-step%3D01000000-of-01000000.ckpt
 cd ../../
 ```
-and the finetuned SD2.1 unCLIP-L checkpoint _[TODO: +++prelim private upload on HF+++]_ from [https://huggingface.co/stabilityai/stable-unclip-preview](https://huggingface.co/stabilityai/stable-unclip-preview), and put the ckpt into the `checkpoints folder` 
+and the finetuned SD2.1 unCLIP-L checkpoint from [https://huggingface.co/stabilityai/](https://huggingface.co/stabilityai/TODO), and put the ckpt into the `checkpoints folder` 
 
 Then, run
 
