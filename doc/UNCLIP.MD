@@ -5,7 +5,8 @@ trained to invert CLIP image embeddings.
 We finetuned SD 2.1 to accept a CLIP ViT-L/14 image embedding in addition to the text encodings.
 This means that the model can be used to produce image variations, but can also be combined with a text-to-image 
 embedding prior to yield a full text-to-image model at 768x768 resolution. 
-We provide two models, trained on OpenAI CLIP-L and OpenCLIP-H image embeddings, respectively, available from [https://huggingface.co/stabilityai/](TODO).
+We provide two models, trained on OpenAI CLIP-L and OpenCLIP-H image embeddings, respectively, 
+available from [https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip](https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip/tree/main).
 To use them, download from Hugging Face, and put and the weights into the `checkpoints` folder.  
 #### Image Variations
 ![image-variations-l-1](../assets/stable-samples/stable-unclip/unclip-variations.png)
@@ -37,7 +38,7 @@ wget https://arena.kakaocdn.net/brainrepo/models/karlo-public/v1.0.0.alpha/0b623
 wget https://arena.kakaocdn.net/brainrepo/models/karlo-public/v1.0.0.alpha/85626483eaca9f581e2a78d31ff905ca/prior-ckpt-step%3D01000000-of-01000000.ckpt
 cd ../../
 ```
-and the finetuned SD2.1 unCLIP-L checkpoint from [https://huggingface.co/stabilityai/](https://huggingface.co/stabilityai/TODO), and put the ckpt into the `checkpoints folder` 
+and the finetuned SD2.1 unCLIP-L checkpoint from [here](https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip/blob/main/sd21-unclip-l.ckpt), and put the ckpt into the `checkpoints folder` 
 
 Then, run
 
