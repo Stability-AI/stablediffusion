@@ -11,6 +11,8 @@ To use them, download from Hugging Face, and put and the weights into the `check
 #### Image Variations
 ![image-variations-l-1](../assets/stable-samples/stable-unclip/unclip-variations.png)
 
+If you would like to try a demo of this model, please visit https://clipdrop.co/stable-diffusion-reimagine
+
 Run
 
 ```
