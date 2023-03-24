@@ -8,11 +8,13 @@ new checkpoints. The following list provides an overview of all currently availa
 
 ## News
 
+
 **March 24, 2023**
 
 *Stable UnCLIP 2.1*
 
 - New stable diffusion finetune (_Stable unCLIP 2.1_, [HuggingFace](https://huggingface.co/stabilityai/)) at 768x768 resolution,  based on SD2.1-768. This model allows for image variations and mixing operations as described in [*Hierarchical Text-Conditional Image Generation with CLIP Latents*](https://arxiv.org/abs/2204.06125), and, thanks to its modularity, can be combined with other models such as [KARLO](https://github.com/kakaobrain/karlo). Comes in two variants: [*Stable unCLIP-L*](https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip/blob/main/sd21-unclip-l.ckpt) and [*Stable unCLIP-H*](https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip/blob/main/sd21-unclip-h.ckpt), which are conditioned on CLIP ViT-L and ViT-H image embeddings, respectively. Instructions are available [here](doc/UNCLIP.MD).
+
 
 **December 7, 2022**
 

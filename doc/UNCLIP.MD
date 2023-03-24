@@ -3,8 +3,8 @@
 [unCLIP](https://openai.com/dall-e-2/) is the approach behind OpenAI's [DALL·E 2](https://openai.com/dall-e-2/), 
 trained to invert CLIP image embeddings. 
 We finetuned SD 2.1 to accept a CLIP ViT-L/14 image embedding in addition to the text encodings.
-This means that the model can be used to produce image variations, but can also be combined with a text-to-image 
-embedding prior to yield a full text-to-image model at 768x768 resolution. 
+This means that the model can be used to produce image variations, but can also be combined with a text-to-image
+embedding prior to yield a full text-to-image model at 768x768 resolution.
 
 If you would like to try a demo of this model on the web, please visit https://clipdrop.co/stable-diffusion-reimagine
 

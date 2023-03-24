@@ -1,0 +1,27 @@
+model:
+  type: improved_sr_64_256
+  diffusion_sampler: uniform
+  hparams:
+    channels: 320
+    depth: 3
+    channels_multiple:
+    - 1
+    - 2
+    - 3
+    - 4
+    dropout: 0.0
+
+diffusion:
+  steps: 1000
+  learn_sigma: false
+  sigma_small: true
+  noise_schedule: squaredcos_cap_v2
+  use_kl: false
+  predict_xstart: false
+  rescale_learned_sigmas: true
+  timestep_respacing: '7'
+
+
+sampling:
+  timestep_respacing: '7' # fix
+  clip_denoise: true
