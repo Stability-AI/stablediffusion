@@ -99,6 +99,10 @@ We currently provide the following checkpoints, for various versions:
 
 **SD-unCLIP 2.1** is a finetuned version of Stable Diffusion 2.1, modified to accept (noisy) CLIP image embedding in addition to the text prompt, and can be used to create image variations ([Examples](../assets/stable-samples/stable-unclip/unclip-variations_noise.png)) or can be chained with text-to-image CLIP priors. The amount of noise added to the image embedding can be specified via the `noise_level` (0 means no noise, 1000 full noise).
 
+If you plan on building applications on top of the model that the general public may use, you are responsible for adding the guardrails to minimize or prevent misuse of the application, especially for use-cased highlighted in the earlier section, Misuse, Malicious Use, and Out-of-Scope Use.
+
+A public demo of SD-unCLIP is already available at clipdrop.co/stable-diffusion-reimagine
+
 ### Version 2.0
 
 - `512-base-ema.ckpt`: 550k steps at resolution `256x256` on a subset of [LAION-5B](https://laion.ai/blog/laion-5b/) filtered for explicit pornographic material, using the [LAION-NSFW classifier](https://github.com/LAION-AI/CLIP-based-NSFW-Detector) with `punsafe=0.1` and an [aesthetic score](https://github.com/christophschuhmann/improved-aesthetic-predictor) >= `4.5`.
