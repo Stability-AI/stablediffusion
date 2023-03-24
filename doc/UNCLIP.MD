@@ -15,7 +15,25 @@ To use them, download from Hugging Face, and put and the weights into the `check
 #### Image Variations
 ![image-variations-l-1](../assets/stable-samples/stable-unclip/unclip-variations.png)
 
-Run
+Diffusers integration 
+Stable UnCLIP Image Variations is integrated with the [🧨 diffusers](https://github.com/huggingface/diffusers) library
+```python
+#pip install git+https://github.com/huggingface/diffusers.git transformers accelerate
+import torch
+from diffusers import StableUnCLIPPipeline
+
+pipe = StableUnCLIPPipeline.from_pretrained(
+    "stabilityai/stable-diffusion-2-1-unclip", torch_dtype=torch.float16
+)
+pipe = pipe.to("cuda")
+
+prompt = "a photo of an astronaut riding a horse on mars"
+images = pipe(prompt).images
+images[0].save("astronaut_horse.png")
+```
+Check out the [Stable UnCLIP pipeline docs here](https://huggingface.co/docs/diffusers/api/pipelines/stable_unclip)
+
+Streamlit UI demo
 
 ```
 streamlit run scripts/streamlit/stableunclip.py
