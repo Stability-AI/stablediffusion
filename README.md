@@ -8,6 +8,7 @@ new checkpoints. The following list provides an overview of all currently availa
 
 ## News
 
+
 **March 24, 2023**
 
 *Stable UnCLIP 2.1*
