@@ -101,7 +101,7 @@ We currently provide the following checkpoints, for various versions:
 
 If you plan on building applications on top of the model that the general public may use, you are responsible for adding the guardrails to minimize or prevent misuse of the application, especially for use-cased highlighted in the earlier section, Misuse, Malicious Use, and Out-of-Scope Use.
 
-A public demo of SD-unCLIP is already available at clipdrop.co/stable-diffusion-reimagine
+A public demo of SD-unCLIP is already available at [clipdrop.co/stable-diffusion-reimagine](https://clipdrop.co/stable-diffusion-reimagine)
 
 ### Version 2.0
 
