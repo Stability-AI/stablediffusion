@@ -19,19 +19,29 @@ Diffusers integration
 Stable UnCLIP Image Variations is integrated with the [🧨 diffusers](https://github.com/huggingface/diffusers) library
 ```python
 #pip install git+https://github.com/huggingface/diffusers.git transformers accelerate
+import requests
 import torch
-from diffusers import StableUnCLIPPipeline
+from PIL import Image
+from io import BytesIO
 
-pipe = StableUnCLIPPipeline.from_pretrained(
-    "stabilityai/stable-diffusion-2-1-unclip", torch_dtype=torch.float16
+from diffusers import StableUnCLIPImg2ImgPipeline
+
+#Start the StableUnCLIP Image variations pipeline
+pipe = StableUnCLIPImg2ImgPipeline.from_pretrained(
+    "stabilityai/stable-diffusion-2-1-unclip", torch_dtype=torch.float16, variation="fp16"
 )
 pipe = pipe.to("cuda")
 
-prompt = "a photo of an astronaut riding a horse on mars"
-images = pipe(prompt).images
-images[0].save("astronaut_horse.png")
+#Get image from URL
+url = "https://huggingface.co/datasets/hf-internal-testing/diffusers-images/resolve/main/stable_unclip/tarsila_do_amaral.png"
+response = requests.get(url)
+init_image = Image.open(BytesIO(response.content)).convert("RGB")
+
+#Pipe to make the variation
+images = pipe(init_image).images
+images[0].save("tarsila_variation.png")
 ```
-Check out the [Stable UnCLIP pipeline docs here](https://huggingface.co/docs/diffusers/api/pipelines/stable_unclip)
+Check out the [Stable UnCLIP pipeline docs here](https://huggingface.co/docs/diffusers/main/en/api/pipelines/stable_unclip)
 
 Streamlit UI demo
 
