@@ -1,0 +1,21 @@
+model:
+  type: prior
+  diffusion_sampler: uniform
+  hparams:
+    text_ctx: 77
+    xf_width: 2048
+    xf_layers: 20
+    xf_heads: 32
+    xf_final_ln: true
+    text_drop: 0.2
+    clip_dim: 768
+
+diffusion:
+  steps: 1000
+  learn_sigma: false
+  sigma_small: true
+  noise_schedule: squaredcos_cap_v2
+  use_kl: false
+  predict_xstart: true
+  rescale_learned_sigmas: false
+  timestep_respacing: ''
