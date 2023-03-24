@@ -4,10 +4,14 @@
 trained to invert CLIP image embeddings. 
 We finetuned SD 2.1 to accept a CLIP ViT-L/14 image embedding in addition to the text encodings.
 This means that the model can be used to produce image variations, but can also be combined with a text-to-image 
-embedding prior to yield a full text-to-image model at 768x768 resolution. 
+embedding prior to yield a full text-to-image model at 768x768 resolution.
+
+If you would like to try a demo of this model on the web, please visit https://clipdrop.co/stable-diffusion-reimagine
+
 We provide two models, trained on OpenAI CLIP-L and OpenCLIP-H image embeddings, respectively, 
 available from [https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip](https://huggingface.co/stabilityai/stable-diffusion-2-1-unclip/tree/main).
-To use them, download from Hugging Face, and put and the weights into the `checkpoints` folder.  
+To use them, download from Hugging Face, and put and the weights into the `checkpoints` folder.
+
 #### Image Variations
 ![image-variations-l-1](../assets/stable-samples/stable-unclip/unclip-variations.png)
 
