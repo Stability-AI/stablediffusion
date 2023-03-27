@@ -1,6 +1,6 @@
 cff-version: 1.2.0
 message: If you use this software, please cite it using these metadata.
-title: High-Resolution Image Synthesis with Latent Diffusion Models
+title: stablediffusion
 authors:
   - family-names: Rombach
     given-names: Robin
@@ -42,6 +42,22 @@ input:
 output:
   - format: PDF
     url: https://arxiv.org/pdf/2112.10752.pdf
-eprint: 2112.10752
-archivePrefix: arXiv
-primaryClass: cs.CV
+preferred-citation:
+  type: article
+  authors:
+    - family-names: Rombach
+      given-names: Robin
+    - family-names: Blattmann
+      given-names: Andreas
+    - family-names: Lorenz
+      given-names: Dominik
+    - family-names: Esser
+      given-names: Patrick
+    - family-names: Ommer
+      given-names: Björn
+  doi: "10.48550/arXiv.2112.10752"
+  eprint: "2112.10752"
+  archivePrefix: arXiv
+  primaryClass: cs.CV
+  title: High-Resolution Image Synthesis with Latent Diffusion Models
+  year: 2021
