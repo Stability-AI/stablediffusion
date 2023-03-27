@@ -211,7 +211,7 @@ class MemoryEfficientCrossAttention(nn.Module):
         self.to_v = nn.Linear(context_dim, inner_dim, bias=False)
 
         self.to_out = nn.Sequential(nn.Linear(inner_dim, query_dim), nn.Dropout(dropout))
-        self.attention_op: Optional[Any] = None
+        self.attention_op: Optional[Any] = xformers.ops.MemoryEfficientAttentionCutlassOp if hasattr(xformers.ops, "MemoryEfficientAttentionCutlassOp") else None
 
     def forward(self, x, context=None, mask=None):
         q = self.to_q(x)
