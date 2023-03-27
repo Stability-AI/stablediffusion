@@ -42,3 +42,6 @@ input:
 output:
   - format: PDF
     url: https://arxiv.org/pdf/2112.10752.pdf
+eprint: 2112.10752
+archivePrefix: arXiv
+primaryClass: cs.CV
