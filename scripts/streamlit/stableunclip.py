@@ -30,6 +30,15 @@ VERSION2SPECS = {
 }
 
 
+def get_device():
+    if torch.cuda.is_available():
+        return 'cuda'
+    elif torch.backends.mps.is_available():
+        return 'mps'
+    else:
+        return 'cpu'
+
+
 def get_obj_from_str(string, reload=False):
     module, cls = string.rsplit(".", 1)
     importlib.invalidate_caches()
@@ -69,7 +78,7 @@ def load_img(display=True, key=None):
 
 
 def get_init_img(batch_size=1, key=None):
-    init_image = load_img(key=key).cuda()
+    init_image = load_img(key=key).to(get_device())
     init_image = repeat(init_image, '1 ... -> b ...', b=batch_size)
     return init_image
 
@@ -97,7 +106,10 @@ def sample(
         only_adm_cond=False
 ):
     batch_size = n_samples
+    device = torch.device(get_device())
     precision_scope = autocast if not use_full_precision else nullcontext
+    if device.type == 'mps':
+        precision_scope = nullcontext
     # decoderscope = autocast if not use_full_precision else nullcontext
     if use_full_precision: st.warning(f"Running {model.__class__.__name__} at full precision.")
     if isinstance(prompt, str):
@@ -106,7 +118,7 @@ def sample(
 
     outputs = st.empty()
 
-    with precision_scope("cuda"):
+    with precision_scope(device.type):
         with model.ema_scope():
             all_samples = list()
             for n in trange(n_runs, desc="Sampling"):
@@ -208,6 +220,7 @@ def init(version="Stable unCLIP-L", load_karlo_prior=False):
             from ldm.modules.karlo.kakao.sampler import T2ISampler
             st.info("Loading full KARLO..")
             karlo = T2ISampler.from_pretrained(
+                device=get_device(),
                 root_dir="checkpoints/karlo_models",
                 clip_model_path="ViT-L-14.pt",
                 clip_stat_path="ViT-L-14_stats.th",
@@ -227,6 +240,7 @@ def init(version="Stable unCLIP-L", load_karlo_prior=False):
             from ldm.modules.karlo.kakao.sampler import PriorSampler
             st.info("Loading KARLO CLIP prior...")
             karlo_prior = PriorSampler.from_pretrained(
+                device=get_device(),
                 root_dir="checkpoints/karlo_models",
                 clip_model_path="ViT-L-14.pt",
                 clip_stat_path="ViT-L-14_stats.th",
@@ -263,7 +277,7 @@ def load_model_from_config(config, ckpt, verbose=False, vae_sd=None):
         print("unexpected keys:")
         print(u)
 
-    model.cuda()
+    model.to(get_device())
     model.eval()
     print(f"Loaded global step {global_step}")
     return model, msg
@@ -301,7 +315,7 @@ if __name__ == "__main__":
         pass
     else:
         if sampler == "DPM":
-            sampler = DPMSolverSampler(state["model"])
+            sampler = DPMSolverSampler(state["model"], device=get_device())
         elif sampler == "DDIM":
             sampler = DDIMSampler(state["model"])
         else:

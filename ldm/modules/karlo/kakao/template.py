@@ -73,15 +73,16 @@ class BaseSampler:
 
         return line
 
-    def load_clip(self, clip_path: str):
+    def load_clip(self, clip_path: str, device):
         clip = CustomizedCLIP.load_from_checkpoint(
             os.path.join(self._root_dir, clip_path)
         )
         clip = torch.jit.script(clip)
-        clip.cuda()
+        clip.to(device)
         clip.eval()
 
         self._clip = clip
+        self.device = device
         self._tokenizer = CustomizedTokenizer()
 
     def load_prior(
@@ -105,7 +106,7 @@ class BaseSampler:
             os.path.join(self._root_dir, ckpt_path),
             strict=True,
         )
-        prior.cuda()
+        prior.to(self.device)
         prior.eval()
         logging.info("done.")
 
@@ -121,7 +122,7 @@ class BaseSampler:
             os.path.join(self._root_dir, ckpt_path),
             strict=True,
         )
-        decoder.cuda()
+        decoder.to(self.device)
         decoder.eval()
         logging.info("done.")
 
@@ -134,7 +135,7 @@ class BaseSampler:
         sr = self._SR256_CLASS.load_from_checkpoint(
             config, os.path.join(self._root_dir, ckpt_path), strict=True
         )
-        sr.cuda()
+        sr.to(self.device)
         sr.eval()
         logging.info("done.")
 

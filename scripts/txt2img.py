@@ -20,12 +20,21 @@ from ldm.models.diffusion.dpm_solver import DPMSolverSampler
 
 torch.set_grad_enabled(False)
 
+def get_device():
+    if torch.cuda.is_available():
+        return 'cuda'
+    elif torch.backends.mps.is_available():
+        return 'mps'
+    else:
+        return 'cpu'
+
+
 def chunk(it, size):
     it = iter(it)
     return iter(lambda: tuple(islice(it, size)), ())
 
 
-def load_model_from_config(config, ckpt, device=torch.device("cuda"), verbose=False):
+def load_model_from_config(config, ckpt, verbose=False):
     print(f"Loading model from {ckpt}")
     pl_sd = torch.load(ckpt, map_location="cpu")
     if "global_step" in pl_sd:
@@ -39,14 +48,7 @@ def load_model_from_config(config, ckpt, device=torch.device("cuda"), verbose=Fa
     if len(u) > 0 and verbose:
         print("unexpected keys:")
         print(u)
-
-    if device == torch.device("cuda"):
-        model.cuda()
-    elif device == torch.device("cpu"):
-        model.cpu()
-        model.cond_stage_model.device = "cpu"
-    else:
-        raise ValueError(f"Incorrect device name. Received: {device}")
+    model.to(opt.device)
     model.eval()
     return model
 
@@ -150,7 +152,7 @@ def parse_args():
     parser.add_argument(
         "--config",
         type=str,
-        default="configs/stable-diffusion/v2-inference.yaml",
+        default="configs/stable-diffusion/v2-inference-v.yaml",
         help="path to config which constructs model",
     )
     parser.add_argument(
@@ -181,8 +183,8 @@ def parse_args():
         "--device",
         type=str,
         help="Device on which Stable Diffusion will be run",
-        choices=["cpu", "cuda"],
-        default="cpu"
+        choices=["cpu", "cuda", "mps"],
+        default=get_device()
     )
     parser.add_argument(
         "--torchscript",
@@ -215,8 +217,8 @@ def main(opt):
     seed_everything(opt.seed)
 
     config = OmegaConf.load(f"{opt.config}")
-    device = torch.device("cuda") if opt.device == "cuda" else torch.device("cpu")
-    model = load_model_from_config(config, f"{opt.ckpt}", device)
+    device = torch.device(opt.device)
+    model = load_model_from_config(config, f"{opt.ckpt}")
 
     if opt.plms:
         sampler = PLMSSampler(model, device=device)
@@ -330,9 +332,11 @@ def main(opt):
             for _ in range(3):
                 x_samples_ddim = model.decode_first_stage(samples_ddim)
 
-    precision_scope = autocast if opt.precision=="autocast" or opt.bf16 else nullcontext
+    precision_scope = autocast if opt.precision=="autocast" else nullcontext
+    if device.type == 'mps':
+        precision_scope = nullcontext
     with torch.no_grad(), \
-        precision_scope(opt.device), \
+            precision_scope(device.type), \
         model.ema_scope():
             all_samples = list()
             for n in trange(opt.n_iter, desc="Sampling"):

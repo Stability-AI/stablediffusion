@@ -11,6 +11,7 @@ import torch
 import torchvision.transforms.functional as TVF
 from torchvision.transforms import InterpolationMode
 
+from contextlib import nullcontext
 from .template import BaseSampler, CKPT_PATH
 
 
@@ -31,6 +32,7 @@ class T2ISampler(BaseSampler):
     @classmethod
     def from_pretrained(
             cls,
+            device,
             root_dir: str,
             clip_model_path: str,
             clip_stat_path: str,
@@ -41,7 +43,7 @@ class T2ISampler(BaseSampler):
             root_dir=root_dir,
             sampling_type=sampling_type,
         )
-        model.load_clip(clip_model_path)
+        model.load_clip(clip_model_path, device)
         model.load_prior(
             f"{CKPT_PATH['prior']}",
             clip_stat_path=clip_stat_path,
@@ -60,10 +62,10 @@ class T2ISampler(BaseSampler):
         prompts_batch = [prompt for _ in range(bsz)]
 
         prior_cf_scales_batch = [self._prior_cf_scale] * len(prompts_batch)
-        prior_cf_scales_batch = torch.tensor(prior_cf_scales_batch, device="cuda")
+        prior_cf_scales_batch = torch.tensor(prior_cf_scales_batch, device=self.device)
 
         decoder_cf_scales_batch = [self._decoder_cf_scale] * len(prompts_batch)
-        decoder_cf_scales_batch = torch.tensor(decoder_cf_scales_batch, device="cuda")
+        decoder_cf_scales_batch = torch.tensor(decoder_cf_scales_batch, device=self.device)
 
         """ Get CLIP text feature """
         clip_model = self._clip
@@ -79,7 +81,7 @@ class T2ISampler(BaseSampler):
         tok = torch.cat([tok, cf_token], dim=0)
         mask = torch.cat([mask, cf_mask], dim=0)
 
-        tok, mask = tok.to(device="cuda"), mask.to(device="cuda")
+        tok, mask = tok.to(device=self.device), mask.to(device=self.device)
         txt_feat, txt_feat_seq = clip_model.encode_text(tok)
 
         return (
@@ -99,7 +101,8 @@ class T2ISampler(BaseSampler):
             progressive_mode=None,
     ) -> Iterator[torch.Tensor]:
         assert progressive_mode in ("loop", "stage", "final")
-        with torch.no_grad(), torch.cuda.amp.autocast():
+        precision_scope = nullcontext if self.device.type == 'mps' else torch.cuda.amp.autocast
+        with torch.no_grad(), precision_scope(self.device.type):
             (
                 prompts_batch,
                 prior_cf_scales_batch,
@@ -181,6 +184,7 @@ class PriorSampler(BaseSampler):
     @classmethod
     def from_pretrained(
             cls,
+            device,
             root_dir: str,
             clip_model_path: str,
             clip_stat_path: str,
@@ -190,7 +194,7 @@ class PriorSampler(BaseSampler):
             root_dir=root_dir,
             sampling_type=sampling_type,
         )
-        model.load_clip(clip_model_path)
+        model.load_clip(clip_model_path, device)
         model.load_prior(
             f"{CKPT_PATH['prior']}",
             clip_stat_path=clip_stat_path,
@@ -207,10 +211,10 @@ class PriorSampler(BaseSampler):
         prompts_batch = [prompt for _ in range(bsz)]
 
         prior_cf_scales_batch = [self._prior_cf_scale] * len(prompts_batch)
-        prior_cf_scales_batch = torch.tensor(prior_cf_scales_batch, device="cuda")
+        prior_cf_scales_batch = torch.tensor(prior_cf_scales_batch, device=self.device)
 
         decoder_cf_scales_batch = [self._decoder_cf_scale] * len(prompts_batch)
-        decoder_cf_scales_batch = torch.tensor(decoder_cf_scales_batch, device="cuda")
+        decoder_cf_scales_batch = torch.tensor(decoder_cf_scales_batch, device=self.device)
 
         """ Get CLIP text feature """
         clip_model = self._clip
@@ -226,7 +230,7 @@ class PriorSampler(BaseSampler):
         tok = torch.cat([tok, cf_token], dim=0)
         mask = torch.cat([mask, cf_mask], dim=0)
 
-        tok, mask = tok.to(device="cuda"), mask.to(device="cuda")
+        tok, mask = tok.to(device=self.device), mask.to(device=self.device)
         txt_feat, txt_feat_seq = clip_model.encode_text(tok)
 
         return (
@@ -246,7 +250,8 @@ class PriorSampler(BaseSampler):
             progressive_mode=None,
     ) -> Iterator[torch.Tensor]:
         assert progressive_mode in ("loop", "stage", "final")
-        with torch.no_grad(), torch.cuda.amp.autocast():
+        precision_scope = nullcontext if self.device.type == 'mps' else torch.autocast
+        with torch.no_grad(), precision_scope(self.device.type):
             (
                 prompts_batch,
                 prior_cf_scales_batch,
