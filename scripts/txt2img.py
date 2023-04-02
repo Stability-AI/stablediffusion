@@ -311,7 +311,7 @@ def main(opt):
 
         prompts = data[0]
         print("Running a forward pass to initialize optimizations")
-        uc = Nonede
+        uc = None
         if opt.scale != 1.0:
             uc = model.get_learned_conditioning(batch_size * [""])
         if isinstance(prompts, tuple):
