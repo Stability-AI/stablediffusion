@@ -16,16 +16,15 @@ from pytorch_lightning import seed_everything
 from imwatermark import WatermarkEncoder
 
 
-from ldm import global_opt as g
 from scripts.txt2img import put_watermark
 from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 
 
 def get_device():
-    if(torch.cuda.is_available()):
+    if torch.cuda.is_available():
         return 'cuda'
-    elif(torch.backends.mps.is_available()):
+    elif torch.backends.mps.is_available():
         return 'mps'
     else:
         return 'cpu'
@@ -197,7 +196,7 @@ def main():
         default="autocast"
     )
 
-    opt = g.opt = parser.parse_args()
+    opt = parser.parse_args()
     seed_everything(opt.seed)
 
     config = OmegaConf.load(f"{opt.config}")

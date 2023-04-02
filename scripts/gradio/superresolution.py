@@ -6,6 +6,7 @@ from PIL import Image
 from omegaconf import OmegaConf
 from einops import repeat, rearrange
 from pytorch_lightning import seed_everything
+from contextlib import nullcontext
 from imwatermark import WatermarkEncoder
 
 from scripts.txt2img import put_watermark
@@ -17,15 +18,23 @@ from ldm.util import exists, instantiate_from_config
 torch.set_grad_enabled(False)
 
 
+def get_device():
+    if torch.cuda.is_available():
+        return 'cuda'
+    elif torch.backends.mps.is_available():
+        return 'mps'
+    else:
+        return 'cpu'
+
+
 def initialize_model(config, ckpt):
     config = OmegaConf.load(config)
     model = instantiate_from_config(config.model)
     model.load_state_dict(torch.load(ckpt)["state_dict"], strict=False)
 
-    device = torch.device(
-        "cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = get_device()
     model = model.to(device)
-    sampler = DDIMSampler(model)
+    sampler = DDIMSampler(model, device)
     return sampler
 
 
@@ -54,8 +63,7 @@ def make_noise_augmentation(model, batch, noise_level=None):
 
 
 def paint(sampler, image, prompt, seed, scale, h, w, steps, num_samples=1, callback=None, eta=0., noise_level=None):
-    device = torch.device(
-        "cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device(get_device())
     model = sampler.model
     seed_everything(seed)
     prng = np.random.RandomState(seed)
@@ -67,8 +75,9 @@ def paint(sampler, image, prompt, seed, scale, h, w, steps, num_samples=1, callb
     wm = "SDV2"
     wm_encoder = WatermarkEncoder()
     wm_encoder.set_watermark('bytes', wm.encode('utf-8'))
+    precision_scope = nullcontext if device.type == 'mps' else torch.autocast
     with torch.no_grad(),\
-            torch.autocast("cuda"):
+            precision_scope(device.type):
         batch = make_batch_sd(
             image, txt=prompt, device=device, num_samples=num_samples)
         c = model.cond_stage_model.encode(batch["txt"])

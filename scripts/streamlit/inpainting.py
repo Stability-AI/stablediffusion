@@ -7,6 +7,7 @@ from PIL import Image
 from omegaconf import OmegaConf
 from einops import repeat
 from streamlit_drawable_canvas import st_canvas
+from contextlib import nullcontext
 from imwatermark import WatermarkEncoder
 
 from ldm.models.diffusion.ddim import DDIMSampler
@@ -14,6 +15,15 @@ from ldm.util import instantiate_from_config
 
 
 torch.set_grad_enabled(False)
+
+
+def get_device():
+    if torch.cuda.is_available():
+        return 'cuda'
+    elif torch.backends.mps.is_available():
+        return 'mps'
+    else:
+        return 'cpu'
 
 
 def put_watermark(img, wm_encoder=None):
@@ -31,9 +41,9 @@ def initialize_model(config, ckpt):
 
     model.load_state_dict(torch.load(ckpt)["state_dict"], strict=False)
 
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = torch.device(get_device())
     model = model.to(device)
-    sampler = DDIMSampler(model)
+    sampler = DDIMSampler(model, device)
 
     return sampler
 
@@ -67,7 +77,7 @@ def make_batch_sd(
 
 
 def inpaint(sampler, image, mask, prompt, seed, scale, ddim_steps, num_samples=1, w=512, h=512, eta=1.):
-    device = torch.device("cuda") if torch.cuda.is_available() else torch.device("cpu")
+    device = get_device()
     model = sampler.model
 
     print("Creating invisible watermark encoder (see https://github.com/ShieldMnt/invisible-watermark)...")
@@ -79,8 +89,9 @@ def inpaint(sampler, image, mask, prompt, seed, scale, ddim_steps, num_samples=1
     start_code = prng.randn(num_samples, 4, h // 8, w // 8)
     start_code = torch.from_numpy(start_code).to(device=device, dtype=torch.float32)
 
-    with torch.no_grad(), \
-            torch.autocast("cuda"):
+    precision_scope = nullcontext if device.type == 'mps' else torch.autocast
+    with torch.no_grad(),\
+            precision_scope(device.type):
             batch = make_batch_sd(image, mask, txt=prompt, device=device, num_samples=num_samples)
 
             c = model.cond_stage_model.encode(batch["txt"])

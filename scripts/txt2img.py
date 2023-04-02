@@ -13,7 +13,6 @@ from torch import autocast
 from contextlib import nullcontext
 from imwatermark import WatermarkEncoder
 
-from ldm import global_opt as g
 from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
 from ldm.models.diffusion.plms import PLMSSampler
@@ -22,9 +21,9 @@ from ldm.models.diffusion.dpm_solver import DPMSolverSampler
 torch.set_grad_enabled(False)
 
 def get_device():
-    if(torch.cuda.is_available()):
+    if torch.cuda.is_available():
         return 'cuda'
-    elif(torch.backends.mps.is_available()):
+    elif torch.backends.mps.is_available():
         return 'mps'
     else:
         return 'cpu'
@@ -389,5 +388,5 @@ def main(opt):
 
 
 if __name__ == "__main__":
-    opt = g.opt = parse_args()
+    opt = parse_args()
     main(opt)
