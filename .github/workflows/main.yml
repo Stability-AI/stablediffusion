@@ -4,7 +4,7 @@ on:
   push:
     branches: [ master ]
   pull_request:
-    branches: [ master ]
+    branches: [ master, dev ]
 
 concurrency:
   group: ${{ format('docker-ci-{0}', github.head_ref && format('pr-{0}', github.event.pull_request.number) || github.sha) }}
@@ -53,7 +53,7 @@ jobs:
         prod_branch: stable
         dev_branch: master
         repository: ${{ github.repository }}
-        base_branch: ${{ github.ref_name != 'master' }}
+        base_branch: ${{ github.ref_name != 'master' && github.ref_name != 'dev' && 'master' || 'dev'}}
 
         current_ref: ${{ github.ref_name }}
         commit_hash: ${{ github.event.after }}
