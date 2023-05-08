@@ -3,19 +3,19 @@
 # Copyright (c) 2022 KakaoBrain. All Rights Reserved.
 # ------------------------------------------------------------------------------------
 
-import os
 import logging
-import torch
+import os
 
+import torch
 from omegaconf import OmegaConf
 
-from ldm.modules.karlo.kakao.models.clip import CustomizedCLIP, CustomizedTokenizer
+from ldm.modules.karlo.kakao.models.clip import (CustomizedCLIP,
+                                                 CustomizedTokenizer)
+from ldm.modules.karlo.kakao.models.decoder_model import \
+    Text2ImProgressiveModel
 from ldm.modules.karlo.kakao.models.prior_model import PriorDiffusionModel
-from ldm.modules.karlo.kakao.models.decoder_model import Text2ImProgressiveModel
-from ldm.modules.karlo.kakao.models.sr_64_256 import (
-    ImprovedSupRes64to256ProgressiveModel,
-)
-
+from ldm.modules.karlo.kakao.models.sr_64_256 import \
+    ImprovedSupRes64to256ProgressiveModel
 
 SAMPLING_CONF = {
     "default": {

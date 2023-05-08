@@ -1,17 +1,18 @@
 import sys
-import torch
+
 import numpy as np
 import streamlit as st
-from PIL import Image
-from omegaconf import OmegaConf
-from einops import repeat, rearrange
-from pytorch_lightning import seed_everything
+import torch
+from einops import rearrange, repeat
 from imwatermark import WatermarkEncoder
+from omegaconf import OmegaConf
+from PIL import Image
+from pytorch_lightning import seed_everything
 
-from scripts.txt2img import put_watermark
-from ldm.util import instantiate_from_config
-from ldm.models.diffusion.ddim import DDIMSampler
 from ldm.data.util import AddMiDaS
+from ldm.models.diffusion.ddim import DDIMSampler
+from ldm.util import instantiate_from_config
+from scripts.txt2img import put_watermark
 
 torch.set_grad_enabled(False)
 

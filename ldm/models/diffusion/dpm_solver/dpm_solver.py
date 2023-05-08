@@ -1,6 +1,7 @@
+import math
+
 import torch
 import torch.nn.functional as F
-import math
 from tqdm import tqdm
 
 

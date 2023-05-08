@@ -9,14 +9,8 @@ import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
 
-from .nn import (
-    avg_pool_nd,
-    conv_nd,
-    linear,
-    normalization,
-    timestep_embedding,
-    zero_module,
-)
+from .nn import (avg_pool_nd, conv_nd, linear, normalization,
+                 timestep_embedding, zero_module)
 from .xf import LayerNorm
 
 

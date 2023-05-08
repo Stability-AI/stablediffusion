@@ -1,24 +1,25 @@
 """make variations of input image"""
 
-import argparse, os
+import argparse
+import os
+from contextlib import nullcontext
+from itertools import islice
+
+import numpy as np
 import PIL
 import torch
-import numpy as np
+from einops import rearrange, repeat
+from imwatermark import WatermarkEncoder
 from omegaconf import OmegaConf
 from PIL import Image
-from tqdm import tqdm, trange
-from itertools import islice
-from einops import rearrange, repeat
-from torchvision.utils import make_grid
-from torch import autocast
-from contextlib import nullcontext
 from pytorch_lightning import seed_everything
-from imwatermark import WatermarkEncoder
+from torch import autocast
+from torchvision.utils import make_grid
+from tqdm import tqdm, trange
 
-
-from scripts.txt2img import put_watermark
-from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
+from ldm.util import instantiate_from_config
+from scripts.txt2img import put_watermark
 
 
 def chunk(it, size):

@@ -1,12 +1,12 @@
+import kornia
+import open_clip
 import torch
 import torch.nn as nn
-import kornia
 from torch.utils.checkpoint import checkpoint
+from transformers import (CLIPTextModel, CLIPTokenizer, T5EncoderModel,
+                          T5Tokenizer)
 
-from transformers import T5Tokenizer, T5EncoderModel, CLIPTokenizer, CLIPTextModel
-
-import open_clip
-from ldm.util import default, count_params, autocast
+from ldm.util import autocast, count_params, default
 
 
 class AbstractEncoder(nn.Module):
@@ -397,8 +397,9 @@ class FrozenCLIPT5Encoder(AbstractEncoder):
         return [clip_z, t5_z]
 
 
-from ldm.modules.diffusionmodules.upscaling import ImageConcatWithNoiseAugmentation
 from ldm.modules.diffusionmodules.openaimodel import Timestep
+from ldm.modules.diffusionmodules.upscaling import \
+    ImageConcatWithNoiseAugmentation
 
 
 class CLIPEmbeddingNoiseAugmentation(ImageConcatWithNoiseAugmentation):

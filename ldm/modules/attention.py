@@ -1,13 +1,13 @@
-from inspect import isfunction
 import math
+from inspect import isfunction
+from typing import Any, Optional
+
 import torch
 import torch.nn.functional as F
-from torch import nn, einsum
 from einops import rearrange, repeat
-from typing import Optional, Any
+from torch import einsum, nn
 
 from ldm.modules.diffusionmodules.util import checkpoint
-
 
 try:
     import xformers

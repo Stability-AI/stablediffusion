@@ -17,7 +17,6 @@ from typing import List, Optional, Tuple, Union
 
 import torch
 from torch.nn import functional as F
-
 from transformers import CLIPTextModelWithProjection, CLIPTokenizer
 from transformers.models.clip.modeling_clip import CLIPTextModelOutput
 
@@ -26,7 +25,6 @@ from ...pipelines import DiffusionPipeline, ImagePipelineOutput
 from ...schedulers import UnCLIPScheduler
 from ...utils import is_accelerate_available, logging, randn_tensor
 from .text_proj import UnCLIPTextProjModel
-
 
 logger = logging.get_logger(__name__)  # pylint: disable=invalid-name
 

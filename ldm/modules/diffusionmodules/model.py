@@ -1,10 +1,11 @@
 # pytorch_diffusion + derived encoder decoder
 import math
+from typing import Any, Optional
+
+import numpy as np
 import torch
 import torch.nn as nn
-import numpy as np
 from einops import rearrange
-from typing import Optional, Any
 
 from ldm.modules.attention import MemoryEfficientCrossAttention
 

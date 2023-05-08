@@ -1,6 +1,7 @@
-import numpy as np
-import cv2
 import math
+
+import cv2
+import numpy as np
 
 
 def apply_min_size(sample, size, image_interpolation_method=cv2.INTER_AREA):

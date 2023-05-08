@@ -1,21 +1,15 @@
-from abc import abstractmethod
 import math
+from abc import abstractmethod
 
 import numpy as np
 import torch as th
 import torch.nn as nn
 import torch.nn.functional as F
 
-from ldm.modules.diffusionmodules.util import (
-    checkpoint,
-    conv_nd,
-    linear,
-    avg_pool_nd,
-    zero_module,
-    normalization,
-    timestep_embedding,
-)
 from ldm.modules.attention import SpatialTransformer
+from ldm.modules.diffusionmodules.util import (avg_pool_nd, checkpoint,
+                                               conv_nd, linear, normalization,
+                                               timestep_embedding, zero_module)
 from ldm.util import exists
 
 

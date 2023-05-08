@@ -11,7 +11,7 @@ import torch
 import torchvision.transforms.functional as TVF
 from torchvision.transforms import InterpolationMode
 
-from .template import BaseSampler, CKPT_PATH
+from .template import CKPT_PATH, BaseSampler
 
 
 class T2ISampler(BaseSampler):

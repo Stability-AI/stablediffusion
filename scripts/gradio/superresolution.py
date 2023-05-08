@@ -1,21 +1,19 @@
 import sys
-import torch
-import numpy as np
+
 import gradio as gr
-from PIL import Image
-from omegaconf import OmegaConf
-from einops import repeat, rearrange
-from pytorch_lightning import seed_everything
+import numpy as np
+import torch
+from einops import rearrange, repeat
 from imwatermark import WatermarkEncoder
+from omegaconf import OmegaConf
+from PIL import Image
+from pytorch_lightning import seed_everything
 
-from scripts.txt2img import put_watermark
 from ldm.models.diffusion.ddim import DDIMSampler
-from ldm.models.diffusion.ddpm import (
-    LatentUpscaleDiffusion,
-    LatentUpscaleFinetuneDiffusion,
-)
+from ldm.models.diffusion.ddpm import (LatentUpscaleDiffusion,
+                                       LatentUpscaleFinetuneDiffusion)
 from ldm.util import exists, instantiate_from_config
-
+from scripts.txt2img import put_watermark
 
 torch.set_grad_enabled(False)
 

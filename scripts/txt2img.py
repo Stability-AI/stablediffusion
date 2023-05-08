@@ -1,22 +1,24 @@
-import argparse, os
+import argparse
+import os
+from contextlib import nullcontext
+from itertools import islice
+
 import cv2
-import torch
 import numpy as np
+import torch
+from einops import rearrange
+from imwatermark import WatermarkEncoder
 from omegaconf import OmegaConf
 from PIL import Image
-from tqdm import tqdm, trange
-from itertools import islice
-from einops import rearrange
-from torchvision.utils import make_grid
 from pytorch_lightning import seed_everything
 from torch import autocast
-from contextlib import nullcontext
-from imwatermark import WatermarkEncoder
+from torchvision.utils import make_grid
+from tqdm import tqdm, trange
 
-from ldm.util import instantiate_from_config
 from ldm.models.diffusion.ddim import DDIMSampler
-from ldm.models.diffusion.plms import PLMSSampler
 from ldm.models.diffusion.dpm_solver import DPMSolverSampler
+from ldm.models.diffusion.plms import PLMSSampler
+from ldm.util import instantiate_from_config
 
 torch.set_grad_enabled(False)
 
