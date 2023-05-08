@@ -1,22 +1,24 @@
 import importlib
-import streamlit as st
-import torch
+import io
+import os
+from contextlib import nullcontext
+
 import cv2
 import numpy as np
 import PIL
+import streamlit as st
+import torch
+from einops import rearrange, repeat
 from omegaconf import OmegaConf
 from PIL import Image
-from tqdm import trange
-import io, os
-from torch import autocast
-from einops import rearrange, repeat
-from torchvision.utils import make_grid
 from pytorch_lightning import seed_everything
-from contextlib import nullcontext
+from torch import autocast
+from torchvision.utils import make_grid
+from tqdm import trange
 
 from ldm.models.diffusion.ddim import DDIMSampler
-from ldm.models.diffusion.plms import PLMSSampler
 from ldm.models.diffusion.dpm_solver import DPMSolverSampler
+from ldm.models.diffusion.plms import PLMSSampler
 
 torch.set_grad_enabled(False)
 
@@ -26,7 +28,7 @@ SAVE_PATH = "outputs/demo/stable-unclip/"
 VERSION2SPECS = {
     "Stable unCLIP-L": {"H": 768, "W": 768, "C": 4, "f": 8},
     "Stable unOpenCLIP-H": {"H": 768, "W": 768, "C": 4, "f": 8},
-    "Full Karlo": {}
+    "Full Karlo": {},
 }
 
 
@@ -65,41 +67,42 @@ def load_img(display=True, key=None):
     image = np.array(image).astype(np.float32) / 255.0
     image = image[None].transpose(0, 3, 1, 2)
     image = torch.from_numpy(image)
-    return 2. * image - 1.
+    return 2.0 * image - 1.0
 
 
 def get_init_img(batch_size=1, key=None):
     init_image = load_img(key=key).cuda()
-    init_image = repeat(init_image, '1 ... -> b ...', b=batch_size)
+    init_image = repeat(init_image, "1 ... -> b ...", b=batch_size)
     return init_image
 
 
 def sample(
-        model,
-        prompt,
-        n_runs=3,
-        n_samples=2,
-        H=512,
-        W=512,
-        C=4,
-        f=8,
-        scale=10.0,
-        ddim_steps=50,
-        ddim_eta=0.0,
-        callback=None,
-        skip_single_save=False,
-        save_grid=True,
-        ucg_schedule=None,
-        negative_prompt="",
-        adm_cond=None,
-        adm_uc=None,
-        use_full_precision=False,
-        only_adm_cond=False
+    model,
+    prompt,
+    n_runs=3,
+    n_samples=2,
+    H=512,
+    W=512,
+    C=4,
+    f=8,
+    scale=10.0,
+    ddim_steps=50,
+    ddim_eta=0.0,
+    callback=None,
+    skip_single_save=False,
+    save_grid=True,
+    ucg_schedule=None,
+    negative_prompt="",
+    adm_cond=None,
+    adm_uc=None,
+    use_full_precision=False,
+    only_adm_cond=False,
 ):
     batch_size = n_samples
     precision_scope = autocast if not use_full_precision else nullcontext
     # decoderscope = autocast if not use_full_precision else nullcontext
-    if use_full_precision: st.warning(f"Running {model.__class__.__name__} at full precision.")
+    if use_full_precision:
+        st.warning(f"Running {model.__class__.__name__} at full precision.")
     if isinstance(prompt, str):
         prompt = [prompt]
     prompts = batch_size * prompt
@@ -114,66 +117,72 @@ def sample(
                 if not only_adm_cond:
                     uc = None
                     if scale != 1.0:
-                        uc = model.get_learned_conditioning(batch_size * [negative_prompt])
+                        uc = model.get_learned_conditioning(
+                            batch_size * [negative_prompt]
+                        )
                     if isinstance(prompts, tuple):
                         prompts = list(prompts)
                     c = model.get_learned_conditioning(prompts)
 
                 if adm_cond is not None:
                     if adm_cond.shape[0] == 1:
-                        adm_cond = repeat(adm_cond, '1 ... -> b ...', b=batch_size)
+                        adm_cond = repeat(adm_cond, "1 ... -> b ...", b=batch_size)
                     if adm_uc is None:
                         st.warning("Not guiding via c_adm")
                         adm_uc = adm_cond
                     else:
                         if adm_uc.shape[0] == 1:
-                            adm_uc = repeat(adm_uc, '1 ... -> b ...', b=batch_size)
+                            adm_uc = repeat(adm_uc, "1 ... -> b ...", b=batch_size)
                     if not only_adm_cond:
                         c = {"c_crossattn": [c], "c_adm": adm_cond}
                         uc = {"c_crossattn": [uc], "c_adm": adm_uc}
                     else:
                         c = adm_cond
                         uc = adm_uc
-                samples_ddim, _ = sampler.sample(S=ddim_steps,
-                                                 conditioning=c,
-                                                 batch_size=batch_size,
-                                                 shape=shape,
-                                                 verbose=False,
-                                                 unconditional_guidance_scale=scale,
-                                                 unconditional_conditioning=uc,
-                                                 eta=ddim_eta,
-                                                 x_T=None,
-                                                 callback=callback,
-                                                 ucg_schedule=ucg_schedule
-                                                 )
+                samples_ddim, _ = sampler.sample(
+                    S=ddim_steps,
+                    conditioning=c,
+                    batch_size=batch_size,
+                    shape=shape,
+                    verbose=False,
+                    unconditional_guidance_scale=scale,
+                    unconditional_conditioning=uc,
+                    eta=ddim_eta,
+                    x_T=None,
+                    callback=callback,
+                    ucg_schedule=ucg_schedule,
+                )
                 x_samples = model.decode_first_stage(samples_ddim)
                 x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
 
                 if not skip_single_save:
                     base_count = len(os.listdir(os.path.join(SAVE_PATH, "samples")))
                     for x_sample in x_samples:
-                        x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
+                        x_sample = 255.0 * rearrange(
+                            x_sample.cpu().numpy(), "c h w -> h w c"
+                        )
                         Image.fromarray(x_sample.astype(np.uint8)).save(
-                            os.path.join(SAVE_PATH, "samples", f"{base_count:09}.png"))
+                            os.path.join(SAVE_PATH, "samples", f"{base_count:09}.png")
+                        )
                         base_count += 1
 
                 all_samples.append(x_samples)
 
                 # get grid of all samples
                 grid = torch.stack(all_samples, 0)
-                grid = rearrange(grid, 'n b c h w -> (n h) (b w) c')
+                grid = rearrange(grid, "n b c h w -> (n h) (b w) c")
                 outputs.image(grid.cpu().numpy())
 
             # additionally, save grid
-            grid = Image.fromarray((255. * grid.cpu().numpy()).astype(np.uint8))
+            grid = Image.fromarray((255.0 * grid.cpu().numpy()).astype(np.uint8))
             if save_grid:
                 grid_count = len(os.listdir(SAVE_PATH)) - 1
-                grid.save(os.path.join(SAVE_PATH, f'grid-{grid_count:06}.png'))
+                grid.save(os.path.join(SAVE_PATH, f"grid-{grid_count:06}.png"))
 
     return x_samples
 
 
-def make_oscillating_guidance_schedule(num_steps, max_weight=15., min_weight=1.):
+def make_oscillating_guidance_schedule(num_steps, max_weight=15.0, min_weight=1.0):
     schedule = list()
     for i in range(num_steps):
         if float(i / num_steps) < 0.1:
@@ -206,6 +215,7 @@ def init(version="Stable unCLIP-L", load_karlo_prior=False):
 
         elif version == "Full Karlo":
             from ldm.modules.karlo.kakao.sampler import T2ISampler
+
             st.info("Loading full KARLO..")
             karlo = T2ISampler.from_pretrained(
                 root_dir="checkpoints/karlo_models",
@@ -225,6 +235,7 @@ def init(version="Stable unCLIP-L", load_karlo_prior=False):
 
         if load_karlo_prior:
             from ldm.modules.karlo.kakao.sampler import PriorSampler
+
             st.info("Loading KARLO CLIP prior...")
             karlo_prior = PriorSampler.from_pretrained(
                 root_dir="checkpoints/karlo_models",
@@ -252,7 +263,7 @@ def load_model_from_config(config, ckpt, verbose=False, vae_sd=None):
     if vae_sd is not None:
         for k in sd.keys():
             if "first_stage" in k:
-                sd[k] = vae_sd[k[len("first_stage_model."):]]
+                sd[k] = vae_sd[k[len("first_stage_model.") :]]
 
     model = instantiate_from_config(config.model)
     m, u = model.load_state_dict(sd, strict=False)
@@ -273,19 +284,27 @@ if __name__ == "__main__":
     st.title("Stable unCLIP")
     mode = "txt2img"
     version = st.selectbox("Model Version", list(VERSION2SPECS.keys()), 0)
-    use_karlo_prior = version in ["Stable unCLIP-L"] and st.checkbox("Use KARLO prior", False)
+    use_karlo_prior = version in ["Stable unCLIP-L"] and st.checkbox(
+        "Use KARLO prior", False
+    )
     state = init(version=version, load_karlo_prior=use_karlo_prior)
     prompt = st.text_input("Prompt", "a professional photograph")
     negative_prompt = st.text_input("Negative Prompt", "")
-    scale = st.number_input("cfg-scale", value=10., min_value=-100., max_value=100.)
+    scale = st.number_input("cfg-scale", value=10.0, min_value=-100.0, max_value=100.0)
     number_rows = st.number_input("num rows", value=2, min_value=1, max_value=10)
     number_cols = st.number_input("num cols", value=2, min_value=1, max_value=10)
     steps = st.sidebar.number_input("steps", value=20, min_value=1, max_value=1000)
-    eta = st.sidebar.number_input("eta (DDIM)", value=0., min_value=0., max_value=1.)
-    force_full_precision = st.sidebar.checkbox("Force FP32", False)  # TODO: check if/where things break.
+    eta = st.sidebar.number_input("eta (DDIM)", value=0.0, min_value=0.0, max_value=1.0)
+    force_full_precision = st.sidebar.checkbox(
+        "Force FP32", False
+    )  # TODO: check if/where things break.
     if version != "Full Karlo":
-        H = st.sidebar.number_input("H", value=VERSION2SPECS[version]["H"], min_value=64, max_value=2048)
-        W = st.sidebar.number_input("W", value=VERSION2SPECS[version]["W"], min_value=64, max_value=2048)
+        H = st.sidebar.number_input(
+            "H", value=VERSION2SPECS[version]["H"], min_value=64, max_value=2048
+        )
+        W = st.sidebar.number_input(
+            "W", value=VERSION2SPECS[version]["W"], min_value=64, max_value=2048
+        )
         C = VERSION2SPECS[version]["C"]
         f = VERSION2SPECS[version]["f"]
 
@@ -313,8 +332,12 @@ if __name__ == "__main__":
         karlo_sampler = state["karlo_prior"]
         noise_level = None
         if state["model"].noise_augmentor is not None:
-            noise_level = st.number_input("Noise Augmentation for CLIP embeddings", min_value=0,
-                                          max_value=state["model"].noise_augmentor.max_noise_level - 1, value=0)
+            noise_level = st.number_input(
+                "Noise Augmentation for CLIP embeddings",
+                min_value=0,
+                max_value=state["model"].noise_augmentor.max_noise_level - 1,
+                value=0,
+            )
         with torch.no_grad():
             karlo_prediction = iter(
                 karlo_sampler(
@@ -325,8 +348,14 @@ if __name__ == "__main__":
             ).__next__()
             adm_cond = karlo_prediction
             if noise_level is not None:
-                c_adm, noise_level_emb = state["model"].noise_augmentor(adm_cond, noise_level=repeat(
-                    torch.tensor([noise_level]).to(state["model"].device), '1 -> b', b=number_cols))
+                c_adm, noise_level_emb = state["model"].noise_augmentor(
+                    adm_cond,
+                    noise_level=repeat(
+                        torch.tensor([noise_level]).to(state["model"].device),
+                        "1 -> b",
+                        b=number_cols,
+                    ),
+                )
                 adm_cond = torch.cat((c_adm, noise_level_emb), 1)
             adm_uc = torch.zeros_like(adm_cond)
     elif version == "Full Karlo":
@@ -334,22 +363,34 @@ if __name__ == "__main__":
     else:
         num_inputs = st.number_input("Number of Input Images", 1)
 
-
         def make_conditionings_from_input(num=1, key=None):
             init_img = get_init_img(batch_size=number_cols, key=key)
             with torch.no_grad():
                 adm_cond = state["model"].embedder(init_img)
-                weight = st.slider(f"Weight for Input {num}", min_value=-10., max_value=10., value=1.)
+                weight = st.slider(
+                    f"Weight for Input {num}",
+                    min_value=-10.0,
+                    max_value=10.0,
+                    value=1.0,
+                )
                 if state["model"].noise_augmentor is not None:
-                    noise_level = st.number_input(f"Noise Augmentation for CLIP embedding of input #{num}", min_value=0,
-                                                  max_value=state["model"].noise_augmentor.max_noise_level - 1,
-                                                  value=0, )
-                    c_adm, noise_level_emb = state["model"].noise_augmentor(adm_cond, noise_level=repeat(
-                        torch.tensor([noise_level]).to(state["model"].device), '1 -> b', b=number_cols))
+                    noise_level = st.number_input(
+                        f"Noise Augmentation for CLIP embedding of input #{num}",
+                        min_value=0,
+                        max_value=state["model"].noise_augmentor.max_noise_level - 1,
+                        value=0,
+                    )
+                    c_adm, noise_level_emb = state["model"].noise_augmentor(
+                        adm_cond,
+                        noise_level=repeat(
+                            torch.tensor([noise_level]).to(state["model"].device),
+                            "1 -> b",
+                            b=number_cols,
+                        ),
+                    )
                     adm_cond = torch.cat((c_adm, noise_level_emb), 1) * weight
                 adm_uc = torch.zeros_like(adm_cond)
             return adm_cond, adm_uc, weight
-
 
         adm_inputs = list()
         weights = list()
@@ -360,12 +401,20 @@ if __name__ == "__main__":
         adm_cond = torch.stack(adm_inputs).sum(0) / sum(weights)
         if num_inputs > 1:
             if st.checkbox("Apply Noise to Embedding Mix", True):
-                noise_level = st.number_input(f"Noise Augmentation for averaged CLIP embeddings", min_value=0,
-                                              max_value=state["model"].noise_augmentor.max_noise_level - 1, value=50, )
+                noise_level = st.number_input(
+                    f"Noise Augmentation for averaged CLIP embeddings",
+                    min_value=0,
+                    max_value=state["model"].noise_augmentor.max_noise_level - 1,
+                    value=50,
+                )
                 c_adm, noise_level_emb = state["model"].noise_augmentor(
-                    adm_cond[:, :state["model"].noise_augmentor.time_embed.dim],
+                    adm_cond[:, : state["model"].noise_augmentor.time_embed.dim],
                     noise_level=repeat(
-                        torch.tensor([noise_level]).to(state["model"].device), '1 -> b', b=number_cols))
+                        torch.tensor([noise_level]).to(state["model"].device),
+                        "1 -> b",
+                        b=number_cols,
+                    ),
+                )
                 adm_cond = torch.cat((c_adm, noise_level_emb), 1)
 
     if st.button("Sample"):
@@ -374,10 +423,8 @@ if __name__ == "__main__":
         t_progress = st.progress(0)
         result = st.empty()
 
-
         def t_callback(t):
-            t_progress.progress(min((t + 1) / steps, 1.))
-
+            t_progress.progress(min((t + 1) / steps, 1.0))
 
         if version == "Full Karlo":
             outputs = st.empty()
@@ -394,7 +441,7 @@ if __name__ == "__main__":
                     ).__next__()
                     all_samples.append(karlo_prediction)
             grid = torch.stack(all_samples, 0)
-            grid = rearrange(grid, 'n b c h w -> (n h) (b w) c')
+            grid = rearrange(grid, "n b c h w -> (n h) (b w) c")
             outputs.image(grid.cpu().numpy())
 
         else:
@@ -403,14 +450,18 @@ if __name__ == "__main__":
                 prompt,
                 n_runs=number_rows,
                 n_samples=number_cols,
-                H=H, W=W, C=C, f=f,
+                H=H,
+                W=W,
+                C=C,
+                f=f,
                 scale=scale,
                 ddim_steps=steps,
                 ddim_eta=eta,
                 callback=t_callback,
                 ucg_schedule=ucg_schedule,
                 negative_prompt=negative_prompt,
-                adm_cond=adm_cond, adm_uc=adm_uc,
+                adm_cond=adm_cond,
+                adm_uc=adm_uc,
                 use_full_precision=force_full_precision,
-                only_adm_cond=False
+                only_adm_cond=False,
             )

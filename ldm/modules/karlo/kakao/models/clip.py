@@ -7,14 +7,12 @@
 # ------------------------------------------------------------------------------------
 
 
+import clip
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
-import clip
-
 from clip.model import CLIP, convert_weights
 from clip.simple_tokenizer import SimpleTokenizer, default_bpe
-
 
 """===== Monkey-Patching original CLIP for JIT compile ====="""
 

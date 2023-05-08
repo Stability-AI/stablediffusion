@@ -4,10 +4,7 @@
 
 
 from .diffusion import gaussian_diffusion as gd
-from .diffusion.respace import (
-    SpacedDiffusion,
-    space_timesteps,
-)
+from .diffusion.respace import SpacedDiffusion, space_timesteps
 
 
 def create_gaussian_diffusion(

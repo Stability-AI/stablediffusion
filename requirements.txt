@@ -16,4 +16,8 @@ gradio==3.13.2
 kornia==0.6
 invisible-watermark>=0.1.5
 streamlit-drawable-canvas==0.8.0
+black==23.3.0
+isort==5.9.3
+flake8==4.0.1
+click==8.0.3
 -e .

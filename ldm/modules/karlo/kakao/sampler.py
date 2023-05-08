@@ -11,7 +11,7 @@ import torch
 import torchvision.transforms.functional as TVF
 from torchvision.transforms import InterpolationMode
 
-from .template import BaseSampler, CKPT_PATH
+from .template import CKPT_PATH, BaseSampler
 
 
 class T2ISampler(BaseSampler):
@@ -22,21 +22,20 @@ class T2ISampler(BaseSampler):
     """
 
     def __init__(
-            self,
-            root_dir: str,
-            sampling_type: str = "default",
+        self,
+        root_dir: str,
+        sampling_type: str = "default",
     ):
         super().__init__(root_dir, sampling_type)
 
     @classmethod
     def from_pretrained(
-            cls,
-            root_dir: str,
-            clip_model_path: str,
-            clip_stat_path: str,
-            sampling_type: str = "default",
+        cls,
+        root_dir: str,
+        clip_model_path: str,
+        clip_stat_path: str,
+        sampling_type: str = "default",
     ):
-
         model = cls(
             root_dir=root_dir,
             sampling_type=sampling_type,
@@ -45,16 +44,21 @@ class T2ISampler(BaseSampler):
         model.load_prior(
             f"{CKPT_PATH['prior']}",
             clip_stat_path=clip_stat_path,
-            prior_config="configs/karlo/prior_1B_vit_l.yaml"
+            prior_config="configs/karlo/prior_1B_vit_l.yaml",
         )
-        model.load_decoder(f"{CKPT_PATH['decoder']}", decoder_config="configs/karlo/decoder_900M_vit_l.yaml")
-        model.load_sr_64_256(CKPT_PATH["sr_256"], sr_config="configs/karlo/improved_sr_64_256_1.4B.yaml")
+        model.load_decoder(
+            f"{CKPT_PATH['decoder']}",
+            decoder_config="configs/karlo/decoder_900M_vit_l.yaml",
+        )
+        model.load_sr_64_256(
+            CKPT_PATH["sr_256"], sr_config="configs/karlo/improved_sr_64_256_1.4B.yaml"
+        )
         return model
 
     def preprocess(
-            self,
-            prompt: str,
-            bsz: int,
+        self,
+        prompt: str,
+        bsz: int,
     ):
         """Setup prompts & cfg scales"""
         prompts_batch = [prompt for _ in range(bsz)]
@@ -93,10 +97,10 @@ class T2ISampler(BaseSampler):
         )
 
     def __call__(
-            self,
-            prompt: str,
-            bsz: int,
-            progressive_mode=None,
+        self,
+        prompt: str,
+        bsz: int,
+        progressive_mode=None,
     ) -> Iterator[torch.Tensor]:
         assert progressive_mode in ("loop", "stage", "final")
         with torch.no_grad(), torch.cuda.amp.autocast():
@@ -172,19 +176,19 @@ class PriorSampler(BaseSampler):
     """
 
     def __init__(
-            self,
-            root_dir: str,
-            sampling_type: str = "default",
+        self,
+        root_dir: str,
+        sampling_type: str = "default",
     ):
         super().__init__(root_dir, sampling_type)
 
     @classmethod
     def from_pretrained(
-            cls,
-            root_dir: str,
-            clip_model_path: str,
-            clip_stat_path: str,
-            sampling_type: str = "default",
+        cls,
+        root_dir: str,
+        clip_model_path: str,
+        clip_stat_path: str,
+        sampling_type: str = "default",
     ):
         model = cls(
             root_dir=root_dir,
@@ -194,14 +198,14 @@ class PriorSampler(BaseSampler):
         model.load_prior(
             f"{CKPT_PATH['prior']}",
             clip_stat_path=clip_stat_path,
-            prior_config="configs/karlo/prior_1B_vit_l.yaml"
+            prior_config="configs/karlo/prior_1B_vit_l.yaml",
         )
         return model
 
     def preprocess(
-            self,
-            prompt: str,
-            bsz: int,
+        self,
+        prompt: str,
+        bsz: int,
     ):
         """Setup prompts & cfg scales"""
         prompts_batch = [prompt for _ in range(bsz)]
@@ -240,10 +244,10 @@ class PriorSampler(BaseSampler):
         )
 
     def __call__(
-            self,
-            prompt: str,
-            bsz: int,
-            progressive_mode=None,
+        self,
+        prompt: str,
+        bsz: int,
+        progressive_mode=None,
     ) -> Iterator[torch.Tensor]:
         assert progressive_mode in ("loop", "stage", "final")
         with torch.no_grad(), torch.cuda.amp.autocast():

@@ -3,17 +3,18 @@
 # Copyright (c) 2022 KakaoBrain. All Rights Reserved.
 # ------------------------------------------------------------------------------------
 
-import os
 import logging
-import torch
+import os
 
+import torch
 from omegaconf import OmegaConf
 
 from ldm.modules.karlo.kakao.models.clip import CustomizedCLIP, CustomizedTokenizer
-from ldm.modules.karlo.kakao.models.prior_model import PriorDiffusionModel
 from ldm.modules.karlo.kakao.models.decoder_model import Text2ImProgressiveModel
-from ldm.modules.karlo.kakao.models.sr_64_256 import ImprovedSupRes64to256ProgressiveModel
-
+from ldm.modules.karlo.kakao.models.prior_model import PriorDiffusionModel
+from ldm.modules.karlo.kakao.models.sr_64_256 import (
+    ImprovedSupRes64to256ProgressiveModel,
+)
 
 SAMPLING_CONF = {
     "default": {
@@ -88,7 +89,7 @@ class BaseSampler:
         self,
         ckpt_path: str,
         clip_stat_path: str,
-        prior_config: str = "configs/prior_1B_vit_l.yaml"
+        prior_config: str = "configs/prior_1B_vit_l.yaml",
     ):
         logging.info(f"Loading prior: {ckpt_path}")
 
@@ -111,7 +112,9 @@ class BaseSampler:
 
         self._prior = prior
 
-    def load_decoder(self, ckpt_path: str, decoder_config: str = "configs/decoder_900M_vit_l.yaml"):
+    def load_decoder(
+        self, ckpt_path: str, decoder_config: str = "configs/decoder_900M_vit_l.yaml"
+    ):
         logging.info(f"Loading decoder: {ckpt_path}")
 
         config = OmegaConf.load(decoder_config)
@@ -127,7 +130,9 @@ class BaseSampler:
 
         self._decoder = decoder
 
-    def load_sr_64_256(self, ckpt_path: str, sr_config: str = "configs/improved_sr_64_256_1.4B.yaml"):
+    def load_sr_64_256(
+        self, ckpt_path: str, sr_config: str = "configs/improved_sr_64_256_1.4B.yaml"
+    ):
         logging.info(f"Loading SR(64->256): {ckpt_path}")
 
         config = OmegaConf.load(sr_config)

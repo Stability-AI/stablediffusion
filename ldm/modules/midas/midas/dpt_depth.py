@@ -33,7 +33,6 @@ class DPT(BaseModel):
         channels_last=False,
         use_bn=False,
     ):
-
         super(DPT, self).__init__()
 
         self.channels_last = channels_last
@@ -48,7 +47,7 @@ class DPT(BaseModel):
         self.pretrained, self.scratch = _make_encoder(
             backbone,
             features,
-            False, # Set to true of you want to train from scratch, uses ImageNet weights
+            False,  # Set to true of you want to train from scratch, uses ImageNet weights
             groups=1,
             expand=False,
             exportable=False,
@@ -62,7 +61,6 @@ class DPT(BaseModel):
         self.scratch.refinenet4 = _make_fusion_block(features, use_bn)
 
         self.scratch.output_conv = head
-
 
     def forward(self, x):
         if self.channels_last == True:
@@ -102,8 +100,7 @@ class DPTDepthModel(DPT):
         super().__init__(head, **kwargs)
 
         if path is not None:
-           self.load(path)
+            self.load(path)
 
     def forward(self, x):
         return super().forward(x).squeeze(dim=1)
-

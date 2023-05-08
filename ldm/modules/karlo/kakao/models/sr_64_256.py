@@ -4,10 +4,11 @@
 # ------------------------------------------------------------------------------------
 
 import copy
+
 import torch
 
-from ldm.modules.karlo.kakao.modules.unet import SuperResUNetModel
 from ldm.modules.karlo.kakao.modules import create_gaussian_diffusion
+from ldm.modules.karlo.kakao.modules.unet import SuperResUNetModel
 
 
 class ImprovedSupRes64to256ProgressiveModel(torch.nn.Module):
