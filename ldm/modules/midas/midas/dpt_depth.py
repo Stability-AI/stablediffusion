@@ -33,7 +33,6 @@ class DPT(BaseModel):
         channels_last=False,
         use_bn=False,
     ):
-
         super(DPT, self).__init__()
 
         self.channels_last = channels_last

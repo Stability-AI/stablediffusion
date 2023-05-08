@@ -404,7 +404,7 @@ def add_Gaussian_noise(img, noise_level1=2, noise_level2=25):
         U = orth(np.random.rand(3, 3))
         conv = np.dot(np.dot(np.transpose(U), D), U)
         img = img + np.random.multivariate_normal(
-            [0, 0, 0], np.abs(L ** 2 * conv), img.shape[:2]
+            [0, 0, 0], np.abs(L**2 * conv), img.shape[:2]
         ).astype(np.float32)
     img = np.clip(img, 0.0, 1.0)
     return img
@@ -428,7 +428,7 @@ def add_speckle_noise(img, noise_level1=2, noise_level2=25):
         U = orth(np.random.rand(3, 3))
         conv = np.dot(np.dot(np.transpose(U), D), U)
         img += img * np.random.multivariate_normal(
-            [0, 0, 0], np.abs(L ** 2 * conv), img.shape[:2]
+            [0, 0, 0], np.abs(L**2 * conv), img.shape[:2]
         ).astype(np.float32)
     img = np.clip(img, 0.0, 1.0)
     return img
@@ -520,7 +520,6 @@ def degradation_bsrgan(img, sf=4, lq_patchsize=72, isp_model=None):
         )
 
     for i in shuffle_order:
-
         if i == 0:
             img = add_blur(img, sf=sf)
 
@@ -624,7 +623,6 @@ def degradation_bsrgan_variant(image, sf=4, isp_model=None, up=False):
         )
 
     for i in shuffle_order:
-
         if i == 0:
             image = add_blur(image, sf=sf)
 

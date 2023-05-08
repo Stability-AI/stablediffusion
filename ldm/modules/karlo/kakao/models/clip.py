@@ -106,7 +106,7 @@ class CustomizedCLIP(CLIP):
             )
             vision_patch_size = None
             assert (
-                output_width ** 2 + 1
+                output_width**2 + 1
                 == state_dict["visual.attnpool.positional_embedding"].shape[0]
             )
             image_resolution = output_width * 32

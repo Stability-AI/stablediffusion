@@ -17,7 +17,6 @@ def read_pfm(path):
         tuple: (data, scale)
     """
     with open(path, "rb") as file:
-
         color = None
         width = None
         height = None

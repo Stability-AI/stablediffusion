@@ -360,7 +360,7 @@ class DDIMSampler(object):
             raise NotImplementedError()
 
         # direction pointing to x_t
-        dir_xt = (1.0 - a_prev - sigma_t ** 2).sqrt() * e_t
+        dir_xt = (1.0 - a_prev - sigma_t**2).sqrt() * e_t
         noise = sigma_t * noise_like(x.shape, device, repeat_noise) * temperature
         if noise_dropout > 0.0:
             noise = torch.nn.functional.dropout(noise, p=noise_dropout)
@@ -472,7 +472,6 @@ class DDIMSampler(object):
         use_original_steps=False,
         callback=None,
     ):
-
         timesteps = (
             np.arange(self.ddpm_num_timesteps)
             if use_original_steps

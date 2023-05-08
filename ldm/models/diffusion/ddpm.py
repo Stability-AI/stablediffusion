@@ -242,7 +242,7 @@ class DDPM(pl.LightningModule):
         )
 
         if self.parameterization == "eps":
-            lvlb_weights = self.betas ** 2 / (
+            lvlb_weights = self.betas**2 / (
                 2
                 * self.posterior_variance
                 * to_torch(alphas)
@@ -256,7 +256,7 @@ class DDPM(pl.LightningModule):
             )
         elif self.parameterization == "v":
             lvlb_weights = torch.ones_like(
-                self.betas ** 2
+                self.betas**2
                 / (
                     2
                     * self.posterior_variance
@@ -1358,7 +1358,6 @@ class LatentDiffusion(DDPM):
         start_T=None,
         log_every_t=None,
     ):
-
         if not log_every_t:
             log_every_t = self.log_every_t
         device = self.betas.device

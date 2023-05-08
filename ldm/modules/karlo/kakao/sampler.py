@@ -36,7 +36,6 @@ class T2ISampler(BaseSampler):
         clip_stat_path: str,
         sampling_type: str = "default",
     ):
-
         model = cls(
             root_dir=root_dir,
             sampling_type=sampling_type,
