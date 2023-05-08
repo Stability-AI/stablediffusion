@@ -10,8 +10,10 @@ from PIL import Image
 from pytorch_lightning import seed_everything
 
 from ldm.models.diffusion.ddim import DDIMSampler
-from ldm.models.diffusion.ddpm import (LatentUpscaleDiffusion,
-                                       LatentUpscaleFinetuneDiffusion)
+from ldm.models.diffusion.ddpm import (
+    LatentUpscaleDiffusion,
+    LatentUpscaleFinetuneDiffusion,
+)
 from ldm.util import exists, instantiate_from_config
 from scripts.txt2img import put_watermark
 

@@ -1,8 +1,12 @@
 import torch
 import torch.nn as nn
 
-from .vit import (_make_pretrained_vitb16_384, _make_pretrained_vitb_rn50_384,
-                  _make_pretrained_vitl16_384, forward_vit)
+from .vit import (
+    _make_pretrained_vitb16_384,
+    _make_pretrained_vitb_rn50_384,
+    _make_pretrained_vitl16_384,
+    forward_vit,
+)
 
 
 def _make_encoder(
