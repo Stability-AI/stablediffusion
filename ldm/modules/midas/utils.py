@@ -162,6 +162,7 @@ def resize_depth(depth, width, height):
 
     return depth_resized
 
+
 def write_depth(path, depth, bits=1):
     """Write depth map to pfm and png file.
 
@@ -174,7 +175,7 @@ def write_depth(path, depth, bits=1):
     depth_min = depth.min()
     depth_max = depth.max()
 
-    max_val = (2**(8*bits))-1
+    max_val = (2 ** (8 * bits)) - 1
 
     if depth_max - depth_min > np.finfo("float").eps:
         out = max_val * (depth - depth_min) / (depth_max - depth_min)

@@ -55,7 +55,7 @@ def load_img(path):
     image = np.array(image).astype(np.float32) / 255.0
     image = image[None].transpose(0, 3, 1, 2)
     image = torch.from_numpy(image)
-    return 2. * image - 1.
+    return 2.0 * image - 1.0
 
 
 def main():
@@ -66,14 +66,11 @@ def main():
         type=str,
         nargs="?",
         default="a painting of a virus monster playing guitar",
-        help="the prompt to render"
+        help="the prompt to render",
     )
 
     parser.add_argument(
-        "--init-img",
-        type=str,
-        nargs="?",
-        help="path to the input image"
+        "--init-img", type=str, nargs="?", help="path to the input image"
     )
 
     parser.add_argument(
@@ -81,7 +78,7 @@ def main():
         type=str,
         nargs="?",
         help="dir to write results to",
-        default="outputs/img2img-samples"
+        default="outputs/img2img-samples",
     )
 
     parser.add_argument(
@@ -93,7 +90,7 @@ def main():
 
     parser.add_argument(
         "--fixed_code",
-        action='store_true',
+        action="store_true",
         help="if enabled, uses the same starting code across all samples ",
     )
 
@@ -178,7 +175,7 @@ def main():
         type=str,
         help="evaluate at this precision",
         choices=["full", "autocast"],
-        default="autocast"
+        default="autocast",
     )
 
     opt = parser.parse_args()
@@ -195,10 +192,12 @@ def main():
     os.makedirs(opt.outdir, exist_ok=True)
     outpath = opt.outdir
 
-    print("Creating invisible watermark encoder (see https://github.com/ShieldMnt/invisible-watermark)...")
+    print(
+        "Creating invisible watermark encoder (see https://github.com/ShieldMnt/invisible-watermark)..."
+    )
     wm = "SDV2"
     wm_encoder = WatermarkEncoder()
-    wm_encoder.set_watermark('bytes', wm.encode('utf-8'))
+    wm_encoder.set_watermark("bytes", wm.encode("utf-8"))
 
     batch_size = opt.n_samples
     n_rows = opt.n_rows if opt.n_rows > 0 else batch_size
@@ -220,12 +219,16 @@ def main():
 
     assert os.path.isfile(opt.init_img)
     init_image = load_img(opt.init_img).to(device)
-    init_image = repeat(init_image, '1 ... -> b ...', b=batch_size)
-    init_latent = model.get_first_stage_encoding(model.encode_first_stage(init_image))  # move to latent space
+    init_image = repeat(init_image, "1 ... -> b ...", b=batch_size)
+    init_latent = model.get_first_stage_encoding(
+        model.encode_first_stage(init_image)
+    )  # move to latent space
 
-    sampler.make_schedule(ddim_num_steps=opt.ddim_steps, ddim_eta=opt.ddim_eta, verbose=False)
+    sampler.make_schedule(
+        ddim_num_steps=opt.ddim_steps, ddim_eta=opt.ddim_eta, verbose=False
+    )
 
-    assert 0. <= opt.strength <= 1., 'can only work with strength in [0.0, 1.0]'
+    assert 0.0 <= opt.strength <= 1.0, "can only work with strength in [0.0, 1.0]"
     t_enc = int(opt.strength * opt.ddim_steps)
     print(f"target t_enc is {t_enc} steps")
 
@@ -244,16 +247,27 @@ def main():
                         c = model.get_learned_conditioning(prompts)
 
                         # encode (scaled latent)
-                        z_enc = sampler.stochastic_encode(init_latent, torch.tensor([t_enc] * batch_size).to(device))
+                        z_enc = sampler.stochastic_encode(
+                            init_latent, torch.tensor([t_enc] * batch_size).to(device)
+                        )
                         # decode it
-                        samples = sampler.decode(z_enc, c, t_enc, unconditional_guidance_scale=opt.scale,
-                                                 unconditional_conditioning=uc, )
+                        samples = sampler.decode(
+                            z_enc,
+                            c,
+                            t_enc,
+                            unconditional_guidance_scale=opt.scale,
+                            unconditional_conditioning=uc,
+                        )
 
                         x_samples = model.decode_first_stage(samples)
-                        x_samples = torch.clamp((x_samples + 1.0) / 2.0, min=0.0, max=1.0)
+                        x_samples = torch.clamp(
+                            (x_samples + 1.0) / 2.0, min=0.0, max=1.0
+                        )
 
                         for x_sample in x_samples:
-                            x_sample = 255. * rearrange(x_sample.cpu().numpy(), 'c h w -> h w c')
+                            x_sample = 255.0 * rearrange(
+                                x_sample.cpu().numpy(), "c h w -> h w c"
+                            )
                             img = Image.fromarray(x_sample.astype(np.uint8))
                             img = put_watermark(img, wm_encoder)
                             img.save(os.path.join(sample_path, f"{base_count:05}.png"))
@@ -262,14 +276,14 @@ def main():
 
                 # additionally, save as grid
                 grid = torch.stack(all_samples, 0)
-                grid = rearrange(grid, 'n b c h w -> (n b) c h w')
+                grid = rearrange(grid, "n b c h w -> (n b) c h w")
                 grid = make_grid(grid, nrow=n_rows)
 
                 # to image
-                grid = 255. * rearrange(grid, 'c h w -> h w c').cpu().numpy()
+                grid = 255.0 * rearrange(grid, "c h w -> h w c").cpu().numpy()
                 grid = Image.fromarray(grid.astype(np.uint8))
                 grid = put_watermark(grid, wm_encoder)
-                grid.save(os.path.join(outpath, f'grid-{grid_count:04}.png'))
+                grid.save(os.path.join(outpath, f"grid-{grid_count:04}.png"))
                 grid_count += 1
 
     print(f"Your samples are ready and waiting for you here: \n{outpath} \nEnjoy.")

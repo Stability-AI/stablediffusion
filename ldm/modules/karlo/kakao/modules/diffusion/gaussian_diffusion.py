@@ -26,8 +26,8 @@ def get_beta_schedule(beta_schedule, *, beta_start, beta_end, num_diffusion_time
     if beta_schedule == "quad":
         betas = (
             np.linspace(
-                beta_start**0.5,
-                beta_end**0.5,
+                beta_start ** 0.5,
+                beta_end ** 0.5,
                 num_diffusion_timesteps,
                 dtype=np.float64,
             )
@@ -681,7 +681,7 @@ class GaussianDiffusion(th.nn.Module):
         noise = th.randn_like(x)
         mean_pred = (
             out["pred_xstart"] * th.sqrt(alpha_bar_prev)
-            + th.sqrt(1 - alpha_bar_prev - sigma**2) * eps
+            + th.sqrt(1 - alpha_bar_prev - sigma ** 2) * eps
         )
         nonzero_mask = (
             (t != 0).float().view(-1, *([1] * (len(x.shape) - 1)))

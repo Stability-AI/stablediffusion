@@ -46,8 +46,7 @@ def apply_min_size(sample, size, image_interpolation_method=cv2.INTER_AREA):
 
 
 class Resize(object):
-    """Resize sample to given size (width, height).
-    """
+    """Resize sample to given size (width, height)."""
 
     def __init__(
         self,
@@ -195,8 +194,7 @@ class Resize(object):
 
 
 class NormalizeImage(object):
-    """Normlize image by given mean and std.
-    """
+    """Normlize image by given mean and std."""
 
     def __init__(self, mean, std):
         self.__mean = mean
@@ -209,8 +207,7 @@ class NormalizeImage(object):
 
 
 class PrepareForNet(object):
-    """Prepare sample for usage as network input.
-    """
+    """Prepare sample for usage as network input."""
 
     def __init__(self):
         pass
