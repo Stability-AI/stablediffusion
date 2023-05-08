@@ -99,7 +99,7 @@ def _get_paths_from_images(path):
 
 """
 # --------------------------------------------
-# split large images into small images 
+# split large images into small images
 # --------------------------------------------
 """
 
