@@ -1,0 +1,5 @@
+pulumi==3.64.0
+pulumi-gcp==6.54.0
+pulumi-docker==4.1.2
+pulumi-kubernetes==3.25.0
+google-auth==2.17.3
