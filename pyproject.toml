@@ -1,0 +1,37 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "stable-diffusion"
+dynamic = ["version"]
+description = "Stable Diffusion is a latent text-to-image diffusion model."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.8" # based on environment.yaml
+zip-safe = false # we need to be read the YAMLs from disk
+dependencies = [
+    "numpy",
+    "torch",
+    "tqdm",
+]
+
+[tool.hatch.version]
+path = "ldm/__version__.py"
+
+[tool.hatch.build]
+# This needs to be explicitly set so the configuration files
+# grafted into the `ldm` directory get included in the wheel's
+# RECORD file.
+include = [
+    "ldm",
+]
+# The force-include configurations below make Hatch copy
+# the configs/ directory (containing the various YAML files required
+# to stably diffuse) into the source distribution and the wheel.
+
+[tool.hatch.build.targets.sdist.force-include]
+"./configs" = "ldm/configs"
+
+[tool.hatch.build.targets.wheel.force-include]
+"./configs" = "ldm/configs"
