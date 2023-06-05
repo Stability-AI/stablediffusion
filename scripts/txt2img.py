@@ -182,7 +182,7 @@ def parse_args():
         type=str,
         help="Device on which Stable Diffusion will be run",
         choices=["cpu", "cuda"],
-        default="cpu"
+        default="cuda"
     )
     parser.add_argument(
         "--torchscript",
