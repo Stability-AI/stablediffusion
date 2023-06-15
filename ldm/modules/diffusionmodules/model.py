@@ -11,10 +11,9 @@ from ldm.modules.attention import MemoryEfficientCrossAttention
 try:
     import xformers
     import xformers.ops
-    XFORMERS_IS_AVAILBLE = True
-except:
-    XFORMERS_IS_AVAILBLE = False
-    print("No module 'xformers'. Proceeding without it.")
+    XFORMERS_AVAILABLE = True
+except ImportError:
+    XFORMERS_AVAILABLE = False
 
 
 def get_timestep_embedding(timesteps, embedding_dim):
@@ -279,7 +278,7 @@ class MemoryEfficientCrossAttentionWrapper(MemoryEfficientCrossAttention):
 
 def make_attn(in_channels, attn_type="vanilla", attn_kwargs=None):
     assert attn_type in ["vanilla", "vanilla-xformers", "memory-efficient-cross-attn", "linear", "none"], f'attn_type {attn_type} unknown'
-    if XFORMERS_IS_AVAILBLE and attn_type == "vanilla":
+    if XFORMERS_AVAILABLE and attn_type == "vanilla":
         attn_type = "vanilla-xformers"
     print(f"making attention of type '{attn_type}' with {in_channels} in_channels")
     if attn_type == "vanilla":
