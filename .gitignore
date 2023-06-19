@@ -163,3 +163,7 @@ cython_debug/
 # IDEs
 .idea/
 .vscode/
+
+# MINE
+checkpoints/*
+!checkpoints/.gitkeep
