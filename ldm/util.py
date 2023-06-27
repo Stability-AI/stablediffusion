@@ -9,6 +9,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 
 def autocast(f):
+    """ Decorator for autocasting inside a function """
     def do_autocast(*args, **kwargs):
         with torch.cuda.amp.autocast(enabled=True,
                                      dtype=torch.get_autocast_gpu_dtype(),
@@ -19,6 +20,7 @@ def autocast(f):
 
 
 def log_txt_as_img(wh, xc, size=10):
+    """ Convert a list of strings to a list of images """
     # wh a tuple of (width, height)
     # xc a list of captions to plot
     b = len(xc)

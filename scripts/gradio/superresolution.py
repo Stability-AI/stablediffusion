@@ -18,6 +18,7 @@ torch.set_grad_enabled(False)
 
 
 def initialize_model(config, ckpt):
+    """ Initialize model from config and checkpoint. """
     config = OmegaConf.load(config)
     model = instantiate_from_config(config.model)
     model.load_state_dict(torch.load(ckpt)["state_dict"], strict=False)
@@ -35,6 +36,7 @@ def make_batch_sd(
         device,
         num_samples=1,
 ):
+    """ Make batch for sampling from image and text. """
     image = np.array(image.convert("RGB"))
     image = torch.from_numpy(image).to(dtype=torch.float32) / 127.5 - 1.0
     batch = {
@@ -47,6 +49,7 @@ def make_batch_sd(
 
 
 def make_noise_augmentation(model, batch, noise_level=None):
+    """ Make noise augmentation for low scale model. """
     x_low = batch[model.low_scale_key]
     x_low = x_low.to(memory_format=torch.contiguous_format).float()
     x_aug, noise_level = model.low_scale_model(x_low, noise_level)
@@ -54,6 +57,7 @@ def make_noise_augmentation(model, batch, noise_level=None):
 
 
 def paint(sampler, image, prompt, seed, scale, h, w, steps, num_samples=1, callback=None, eta=0., noise_level=None):
+    """ Paint image from text prompt. """
     device = torch.device(
         "cuda") if torch.cuda.is_available() else torch.device("cpu")
     model = sampler.model
@@ -120,6 +124,7 @@ def paint(sampler, image, prompt, seed, scale, h, w, steps, num_samples=1, callb
 
 
 def pad_image(input_image):
+    """ Pad image to integer multiple of 32. """
     pad_w, pad_h = np.max(((2, 2), np.ceil(
         np.array(input_image.size) / 64).astype(int)), axis=0) * 64 - input_image.size
     im_padded = Image.fromarray(
@@ -128,6 +133,7 @@ def pad_image(input_image):
 
 
 def predict(input_image, prompt, steps, num_samples, scale, seed, eta, noise_level):
+    """ Predict image from text prompt. """
     init_image = input_image.convert("RGB")
     image = pad_image(init_image)  # resize to integer multiple of 32
     width, height = image.size
