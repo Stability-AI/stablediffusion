@@ -17,6 +17,7 @@ torch.set_grad_enabled(False)
 
 
 def put_watermark(img, wm_encoder=None):
+    """ Put watermark on image. """
     if wm_encoder is not None:
         img = cv2.cvtColor(np.array(img), cv2.COLOR_RGB2BGR)
         img = wm_encoder.encode(img, 'dwtDct')
@@ -25,6 +26,7 @@ def put_watermark(img, wm_encoder=None):
 
 
 def initialize_model(config, ckpt):
+    """ Initialize model from config and checkpoint. """
     config = OmegaConf.load(config)
     model = instantiate_from_config(config.model)
 
@@ -44,6 +46,7 @@ def make_batch_sd(
         txt,
         device,
         num_samples=1):
+    """ Make batch for sampling from image and text. """
     image = np.array(image.convert("RGB"))
     image = image[None].transpose(0, 3, 1, 2)
     image = torch.from_numpy(image).to(dtype=torch.float32) / 127.5 - 1.0
@@ -67,6 +70,7 @@ def make_batch_sd(
 
 
 def inpaint(sampler, image, mask, prompt, seed, scale, ddim_steps, num_samples=1, w=512, h=512):
+    """ Inpaint image with prompt. """
     device = torch.device(
         "cuda") if torch.cuda.is_available() else torch.device("cpu")
     model = sampler.model
@@ -135,6 +139,7 @@ def pad_image(input_image):
     return im_padded
 
 def predict(input_image, prompt, ddim_steps, num_samples, scale, seed):
+    """ Predict with prompt. """
     init_image = input_image["image"].convert("RGB")
     init_mask = input_image["mask"].convert("RGB")
     image = pad_image(init_image) # resize to integer multiple of 32
