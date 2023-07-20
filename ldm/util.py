@@ -8,6 +8,16 @@ from inspect import isfunction
 from PIL import Image, ImageDraw, ImageFont
 
 
+def autocast(f):
+    def do_autocast(*args, **kwargs):
+        with torch.cuda.amp.autocast(enabled=True,
+                                     dtype=torch.get_autocast_gpu_dtype(),
+                                     cache_enabled=torch.is_autocast_cache_enabled()):
+            return f(*args, **kwargs)
+
+    return do_autocast
+
+
 def log_txt_as_img(wh, xc, size=10):
     # wh a tuple of (width, height)
     # xc a list of captions to plot
