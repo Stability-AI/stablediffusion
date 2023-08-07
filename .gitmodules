@@ -1,3 +1,0 @@
-[submodule "stable-diffusion-2-1-base"]
-	path = stable-diffusion-2-1-base
-	url = https://huggingface.co/stabilityai/stable-diffusion-2-1-base
