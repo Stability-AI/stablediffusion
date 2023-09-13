@@ -3,7 +3,8 @@ channels:
   - pytorch
   - defaults
 dependencies:
-  - python=3.8.5
+  # Changed to Python 3.9 to make use of precompiled binaries for xformers
+  - python=3.9
   - pip=20.3
   - cudatoolkit=11.3
   - pytorch=1.12.1
