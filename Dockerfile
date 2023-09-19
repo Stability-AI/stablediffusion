@@ -20,9 +20,11 @@ WORKDIR /WORKDIR/
 RUN ln -s /usr/bin/gcc-$MAX_GCC_VERSION /usr/local/cuda/bin/gcc 
 RUN ln -s /usr/bin/g++-$MAX_GCC_VERSION /usr/local/cuda/bin/g++
 ENV CUDA_HOME=/usr/local/cuda-11.6
+#Idea from https://www.reddit.com/user/AiAdventurer/ : https://www.reddit.com/r/StableDiffusion/comments/107hdon/frustration_trying_to_get_xformers_working_always/j3mcfrj/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button
 ENV LD_LIBRARY_PATH=/usr/local/cuda-11.6/lib64
 ENV LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/local/cuda-11.6/include
 ENV PATH="/usr/local/cuda-11.6/bin:$PATH"
+
 ENV TORCH_CUDA_ARCH_LIST="6.0;6.1;6.2;7.0;7.2;8.0;8.6"
 RUN git clone https://github.com/facebookresearch/xformers.git
 WORKDIR /WORKDIR/xformers
@@ -63,6 +65,27 @@ fi
 if [ -z "$STRENGTH" ]; then
     STRENGTH=0.8
 fi 
+if [ -z "$STEPS" ]; then
+    STEPS=50
+fi 
+
+if [ -z "$N_INTER" ]; then
+    N_INTER=3
+fi 
+
+if [ -z "$N_INTER" ]; then
+    N_SAMPLES=3
+fi 
+
+if [ -z "$SCALE" ]; then
+    SCALE=9.0
+fi 
+
+
+if [ -z "$DDIM_ETA" ]; then
+    DDIM_ETA=0.0
+fi 
+
 
 if [ -n "$SCRIPT" ]; then
   case "$SCRIPT" in
@@ -71,7 +94,7 @@ if [ -n "$SCRIPT" ]; then
         if [ -z "$PROMPT" ]; then
             echo "missing prompt , ex. -e PROMPT=\"image of dog\""
         fi
-        python3 scripts/txt2img.py --device cuda --prompt "$PROMPT" --ckpt ./mount/$CKPT --config configs/stable-diffusion/v2-inference-v.yaml --H $HIGHT --W $WIDTH 
+        python3 scripts/txt2img.py --device cuda --ddim_eta $DDIM_ET --scale $SCALE --prompt "$PROMPT" --n_inter N_INTER --n_samples N_SAMPLES --steps $STEPS --ckpt ./mount/$CKPT --config configs/stable-diffusion/v2-inference-v.yaml --H $HIGHT --W $WIDTH 
     ;;
 
     depth-to-image)
@@ -145,7 +168,7 @@ CMD ["./start.sh"]
 
 #STEP 2, run Docker Image as container
     #docker run examples:
-    #text-to-image: docker run --gpus=all -v <YOUR-OUTPUT-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="text-to-image" -e PROMPT="a professional photograph of an astronaut riding a horse" -e CKPT="v2-1_768-ema-pruned.ckpt" -e HIGHT=768 -e WIDTH=768 sd-docker 
+        #text-to-image: docker run --gpus=all -v <YOUR-OUTPUT-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e N_INTER=1 -e N_SAMPLES=1 -e STEPS=90 -e SCALE=14 -e SCRIPT="text-to-image" -e PROMPT="a professional photograph of an astronaut riding a horse" -e CKPT="v2-1_768-ema-pruned.ckpt" -e HIGHT=768 -e WIDTH=768 sd-docker 
         #depth-to-image: docker run --gpus=all  -v <YOUR-OUTPUT-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="depth-to-image" -e IMAGE="image.png" -e PROMPT="a professional photograph of an astronaut riding a horse" -e CKPT="512-depth-ema.ckpt" sd-docker 
         #img-to-img: docker run --gpus=all  -v <YOUR-OUTPUT-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="img-to-img" -e HIGHT=512 -e WIDTH=512 -e IMAGE="text.png" -e PROMPT="a professional photograph of an astronaut riding a horse" -e STRENGTH=0.8 -e CKPT="512-base-ema.ckpt" sd-docker 
         #inpainting: docker run --gpus=all  -v <YOUR-OUTPUT-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="inpainting" -e IMAGE="image.png" -e MASK="mask.png" -e  512-inpainting-ema.ckpt -e HIGHT=512 -e WIDTH=512 sd-docker 
