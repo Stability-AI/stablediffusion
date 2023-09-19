@@ -61,6 +61,13 @@ def parse_args():
         help="the prompt to render"
     )
     parser.add_argument(
+        "--n_prompt",
+        type=str,
+        nargs="?",
+        default="",
+        help="the negative prompt to render"
+    )
+    parser.add_argument(
         "--outdir",
         type=str,
         nargs="?",
@@ -309,8 +316,11 @@ def main(opt):
         prompts = data[0]
         print("Running a forward pass to initialize optimizations")
         uc = None
-        if opt.scale != 1.0:
-            uc = model.get_learned_conditioning(batch_size * [""])
+        if opt.n_prompt == "":
+            if opt.scale != 1.0:
+                uc = model.get_learned_conditioning(batch_size * [""])
+        else:
+            uc = model.get_learned_conditioning(opt.n_prompt)
         if isinstance(prompts, tuple):
             prompts = list(prompts)
 
