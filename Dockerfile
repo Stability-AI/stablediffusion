@@ -6,6 +6,7 @@ RUN dnf install git python38 python38-devel python38-setuptools mesa-libGLU pyth
 
 # Install Stability-AI's stable diffusion, and required packages
 WORKDIR /WORKDIR/
+#Try GeoDerp's Fork if you find negative prompt doesn't work: https://github.com/GeoDerp/stablediffusion.git
 RUN git clone https://github.com/Stability-AI/stablediffusion.git
 WORKDIR /WORKDIR/stablediffusion
 RUN python3 -m pip install torch==1.12.1+cu116 torchvision==0.13.1+cu116 torchaudio==0.12.1 --extra-index-url https://download.pytorch.org/whl/cu116
@@ -47,6 +48,14 @@ EOT
 RUN chmod +xwr OpenCLIP.py
 RUN python3 OpenCLIP.py
 
+#Expose port for Gradio scripts *(yet to work out how to bypass this and just use cli arguments)*
+EXPOSE 7860/tcp
+EXPOSE 7860/udp
+#allow external access to web ui on gradio scripts
+RUN sed -i 's/block.launch()/block.launch(server_name="0.0.0.0")/g' ./scripts/gradio/depth2img.py
+RUN sed -i 's/block.launch()/block.launch(server_name="0.0.0.0")/g' ./scripts/gradio/inpainting.py
+RUN sed -i 's/block.launch()/block.launch(server_name="0.0.0.0")/g' ./scripts/gradio/superresolution.py
+
 
 #Create run script
 RUN cat <<'EOT' >> start.sh
@@ -69,11 +78,11 @@ if [ -z "$STEPS" ]; then
     STEPS=50
 fi 
 
-if [ -z "$N_INTER" ]; then
-    N_INTER=3
+if [ -z "$N_ITER" ]; then
+    N_ITER=3
 fi 
 
-if [ -z "$N_INTER" ]; then
+if [ -z "$N_SAMPLES" ]; then
     N_SAMPLES=3
 fi 
 
@@ -94,17 +103,24 @@ if [ -n "$SCRIPT" ]; then
         if [ -z "$PROMPT" ]; then
             echo "missing prompt , ex. -e PROMPT=\"image of dog\""
         fi
-        python3 scripts/txt2img.py --device cuda --ddim_eta $DDIM_ET --scale $SCALE --prompt "$PROMPT" --n_inter N_INTER --n_samples N_SAMPLES --steps $STEPS --ckpt ./mount/$CKPT --config configs/stable-diffusion/v2-inference-v.yaml --H $HIGHT --W $WIDTH 
+        python3 scripts/txt2img.py --device cuda --ddim_eta $DDIM_ETA --scale $SCALE --prompt "$PROMPT" --n_iter $N_ITER --n_samples $N_SAMPLES --steps $STEPS --ckpt ./mount/$CKPT --config configs/stable-diffusion/v2-inference-v.yaml --H $HIGHT --W $WIDTH 
     ;;
 
-    depth-to-image)
-        if [ -z "$IMAGE" ]; then
-            echo "missing image file, ex. -e IMAGE=IMAGEFILENAME"
-        fi
+    text-to-image-negative)
         if [ -z "$PROMPT" ]; then
             echo "missing prompt , ex. -e PROMPT=\"image of dog\""
         fi
-        python3 scripts/gradio/depth2img.py ./mount/$IMAGE "$PROMPT" configs/stable-diffusion/v2-midas-inference.yaml ./mount/$CKPT
+        if [ -z "$N_PROMPT" ]; then
+            echo "missing negative prompt , ex. -e N_PROMPT=\"blury, low quality\""
+        fi
+        python3 scripts/txt2img.py --device cuda --ddim_eta $DDIM_ETA --scale $SCALE --prompt "$PROMPT" --n_prompt "$N_PROMPT" --n_iter $N_ITER --n_samples $N_SAMPLES  --steps $STEPS --ckpt ./mount/$CKPT --config configs/stable-diffusion/v2-inference-v.yaml --H $HIGHT --W $WIDTH 
+    ;;
+
+    depth-to-image)
+        #need pt file and model to work 
+        mkdir -p ./midas_models/ </dev/null
+        cp ./mount/*.pt ./midas_models/
+        python3 scripts/gradio/depth2img.py configs/stable-diffusion/v2-midas-inference.yaml ./mount/$CKPT
     ;;
 
     img-to-img)
@@ -114,30 +130,17 @@ if [ -n "$SCRIPT" ]; then
         if [ -z "$PROMPT" ]; then
             echo "missing prompt , ex. -e PROMPT=\"image of dog\""
         fi
-        python3 scripts/img2img.py --prompt "$PROMPT" --init-img ./mount/$IMAGE --strength $STRENGTH  --H $HIGHT --W $WIDTH --ckpt ./mount/$CKPT
+        python3 scripts/img2img.py --prompt "$PROMPT" --init-img ./mount/$IMAGE  --scale $SCALE --ddim_eta $DDIM_ETA --n_iter $N_ITER --n_samples $N_SAMPLES --ddim_steps $STEPS --strength $STRENGTH --ckpt ./mount/$CKPT
     ;;
 
     inpainting)
-        if [ -z "$IMAGE" ]; then
-            echo "missing image file, ex. -e IMAGE=IMAGEFILENAME"
-        fi
-        if [ -z "$MASK" ]; then
-            echo "missing mask file, ex. -e MASK=MASKFILENAME"
-        fi
-        if [ -z "$PROMPT" ]; then
-            echo "missing prompt , ex. -e PROMPT=\"image of dog\""
-        fi
-        python3 scripts/gradio/inpainting.py ./mount/$IMAGE ./mount/$MASK "$PROMPT" configs/stable-diffusion/v2-inpainting-inference.yaml ./mount/$CKPT
+        #https://stackoverflow.com/a/48621344
+        rm -rf ~/.nv/ </dev/null
+        python3 scripts/gradio/inpainting.py configs/stable-diffusion/v2-inpainting-inference.yaml ./mount/$CKPT
     ;;
 
     superresolution)
-        if [ -z "$IMAGE" ]; then
-            echo "missing image file, ex. -e IMAGE=IMAGEFILENAME"
-        fi
-        if [ -z "$PROMPT" ]; then
-            echo "missing prompt , ex. -e PROMPT=\"image of dog\""
-        fi
-        python3 scripts/gradio/superresolution.py ./mount/$IMAGE $PROMPT configs/stable-diffusion/x4-upscaling.yaml ./mount/$CKPT
+        python3 scripts/gradio/superresolution.py configs/stable-diffusion/x4-upscaling.yaml ./mount/$CKPT
     ;;
   esac
 
@@ -152,7 +155,7 @@ RUN chmod +xwr start.sh
 RUN sed -i -e 's/\r$//' start.sh
 
 
-#Create folder to mount, this stores ckpt/image/mask files, (ex. -v <LocalFoulder>:/mount) 
+#Create folder to mount, this stores input files: ckpt/image/mask/pt files, (ex. -v <LocalFoulder>:/mount) 
 RUN mkdir mount 
 
 
@@ -168,13 +171,15 @@ CMD ["./start.sh"]
 
 #STEP 2, run Docker Image as container
     #docker run examples:
-        #text-to-image: docker run --gpus=all -v <YOUR-OUTPUT-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e N_INTER=1 -e N_SAMPLES=1 -e STEPS=90 -e SCALE=14 -e SCRIPT="text-to-image" -e PROMPT="a professional photograph of an astronaut riding a horse" -e CKPT="v2-1_768-ema-pruned.ckpt" -e HIGHT=768 -e WIDTH=768 sd-docker 
-        #depth-to-image: docker run --gpus=all  -v <YOUR-OUTPUT-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="depth-to-image" -e IMAGE="image.png" -e PROMPT="a professional photograph of an astronaut riding a horse" -e CKPT="512-depth-ema.ckpt" sd-docker 
-        #img-to-img: docker run --gpus=all  -v <YOUR-OUTPUT-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="img-to-img" -e HIGHT=512 -e WIDTH=512 -e IMAGE="text.png" -e PROMPT="a professional photograph of an astronaut riding a horse" -e STRENGTH=0.8 -e CKPT="512-base-ema.ckpt" sd-docker 
-        #inpainting: docker run --gpus=all  -v <YOUR-OUTPUT-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="inpainting" -e IMAGE="image.png" -e MASK="mask.png" -e  512-inpainting-ema.ckpt -e HIGHT=512 -e WIDTH=512 sd-docker 
-        #superresolution: docker run --gpus=all  -v <YOUR-OUTPUT-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="superresolution" -e IMAGE="image.png" -e CKPT="x4-upscaler-ema.ckpt" -e HIGHT=3072 -e WIDTH=3072 sd-docker 
+        #text-to-image:             docker run --gpus=all -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="text-to-image"           -e PROMPT="a professional photograph of an astronaut riding a horse" -e CKPT="v2-1_768-ema-pruned.ckpt"                                             -e N_ITER=1 -e N_SAMPLES=1 -e STEPS=90 -e SCALE=14 -e HIGHT="768" -e WIDTH="768" sd-docker 
+        #text-to-image-negative:    docker run --gpus=all -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="text-to-image-negative"  -e PROMPT="a professional photograph of an astronaut riding a horse" -e CKPT="v2-1_768-ema-pruned.ckpt" -e N_PROMPT="blury, low quality, low res"   -e N_ITER=1 -e N_SAMPLES=1 -e STEPS=90 -e SCALE=14 -e HIGHT="768" -e WIDTH="768" sd-docker 
+        #img-to-img:                docker run --gpus=all -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="img-to-img"              -e PROMPT="a professional photograph of an astronaut riding a horse" -e CKPT="512-base-ema.ckpt"                                                    -e N_ITER=1 -e N_SAMPLES=1 -e STEPS=90 -e STRENGTH=0.8 -e SCALE="14" sd-docker 
+        #generates web ui: localhost:7860 
+            #depth-to-image:(need pt and ckpt)    docker run --gpus=all -p 7860:7860 -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="depth-to-image"     -e CKPT="512-depth-ema.ckpt" sd-docker 
+            #inpainting:        docker run --gpus=all -p 7860:7860 -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="inpainting"                           -e CKPT="512-inpainting-ema.ckpt" sd-docker 
+            #superresolution:   docker run --gpus=all -p 7860:7860 -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="superresolution"                      -e CKPT="x4-upscaler-ema.ckpt" sd-docker 
 
 
 #STEP 2 - alternative
     #You may also like to run multiple/different commands in the sandboxed space. you can bypass the start script and get access to the terminal via:
-        # docker run -it --gpus=all -v <YOUR-OUTPUT-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount --entrypoint /bin/bash <COMPILED-IMAGE-ID-GOES-HERE>
+        # docker run -it -p 7860:7860 --gpus=all -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount --entrypoint /bin/bash sd
