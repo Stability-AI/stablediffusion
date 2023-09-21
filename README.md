@@ -261,7 +261,60 @@ streamlit run scripts/streamlit/inpainting.py -- configs/stable-diffusion/v2-inp
 for a Gradio or Streamlit demo of the inpainting model. 
 This scripts adds invisible watermarking to the demo in the [RunwayML](https://github.com/runwayml/stable-diffusion/blob/main/scripts/inpaint_st.py) repository, but both should work interchangeably with the checkpoints/configs.  
 
+</br>  
 
+## Docker Install  
+*For those who struggle with installing Stable Diffusion, or like to run the sctipts containerised.*
+
+### STEP 1, build Docker image  
+- Make sure you have: `Docker`, `NVIDIA` and `NVIDIA Cuda` installed on host.
+- Copy Dockerfile to current working directory and run:
+
+```bash
+git clone https://github.com/Stability-AI/stablediffusion.git
+cd stablediffusion
+docker build --tag sd-docker . 
+```
+
+#### STEP 2, run Docker Image as container  
+*Docker run examples:*
+
+- text-to-image:  
+  ```bash
+  docker run --gpus=all -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="text-to-image"           -e PROMPT="a professional photograph of an astronaut riding a horse" -e CKPT="v2-1_768-ema-pruned.ckpt"                                             -e N_ITER=1 -e N_SAMPLES=1 -e STEPS=90 -e SCALE=14 -e HIGHT="768" -e WIDTH="768" sd-docker
+  ``` 
+- text-to-image-negative:  
+  ```bash
+  docker run --gpus=all -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="text-to-image-negative"  -e PROMPT="a professional photograph of an astronaut riding a horse" -e CKPT="v2-1_768-ema-pruned.ckpt" -e N_PROMPT="blury, low quality, low res"   -e N_ITER=1 -e N_SAMPLES=1 -e STEPS=90 -e SCALE=14 -e HIGHT="768" -e WIDTH="768" sd-docker
+  ``` 
+- img-to-img:  
+  ```bash
+  docker run --gpus=all -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="img-to-img"              -e PROMPT="a professional photograph of an astronaut riding a horse" -e CKPT="512-base-ema.ckpt"                                                    -e N_ITER=1 -e N_SAMPLES=1 -e STEPS=90 -e STRENGTH=0.8 -e SCALE="14" sd-docker
+  ``` 
+
+Generates Gradio Web UI: localhost:7860 
+- depth-to-image: (need pt and ckpt)  
+  ```bash
+  docker run --gpus=all -p 7860:7860 -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="depth-to-image"   -e CKPT="512-depth-ema.ckpt" sd-docker
+  ```
+- inpainting:  
+  ```bash
+  docker run --gpus=all -p 7860:7860 -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="inpainting"       -e CKPT="512-inpainting-ema.ckpt" sd-docker
+  ```
+- superresolution:  
+  ```bash
+  docker run --gpus=all -p 7860:7860 -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount -e SCRIPT="superresolution"  -e CKPT="x4-upscaler-ema.ckpt" sd-docker
+  ```
+
+#### STEP 2 - Bash alternative  
+*you may also like to run multiple/different commands in the sandboxed space. you can bypass the start script and get access to the bash terminal via:*
+```bash
+docker run -it -p 7860:7860 --gpus=all -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount --entrypoint /bin/bash sd
+```
+
+#### STEP 2 - Bash alternative  
+*you may also like to run multiple/different commands in the sandboxed space. you can bypass the start script and get access to the terminal via:*
+```docker run -it -p 7860:7860 --gpus=all -v <YOUR-OUTPUTS-DIRECTORY>:/WORKDIR/stablediffusion/outputs -v <YOUR-MOUNT-DIRECTORY>:/WORKDIR/stablediffusion/mount --entrypoint /bin/bash sd```
 
 ## Shout-Outs
 - Thanks to [Hugging Face](https://huggingface.co/) and in particular [Apolinário](https://github.com/apolinario)  for support with our model releases!
