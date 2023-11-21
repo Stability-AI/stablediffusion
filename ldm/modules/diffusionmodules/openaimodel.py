@@ -112,7 +112,13 @@ class Upsample(nn.Module):
                 x, (x.shape[2], x.shape[3] * 2, x.shape[4] * 2), mode="nearest"
             )
         else:
-            x = F.interpolate(x, scale_factor=2, mode="nearest")
+            try:
+                x = F.interpolate(x, scale_factor=2, mode="nearest")
+            except RuntimeError as e:
+                if "not implemented for" in str(e) and "Half" in str(e):
+                    x = F.interpolate(x.to(th.float32), scale_factor=2, mode="nearest").to(x.dtype)
+                else:
+                    print(f"An unexpected RuntimeError occurred: {str(e)}")
         if self.use_conv:
             x = self.conv(x)
         return x
